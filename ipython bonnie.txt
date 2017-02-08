@@ -1,0 +1,25 @@
+import pprint
+import sys
+import os
+import subprocess
+
+import spotipy
+
+import spotipy.util as util
+token = util.prompt_for_user_token('shhhhhigne')
+token
+shh = spotipy.oauth2.SpotifyClientCredentials(client_id='shhhhhigne', client_secret=token)
+shh
+shh.get_access_token()
+shh.is_token_expired()
+shh.is_token_expired(token)
+dir(shh)
+shh.token_info
+shh._is_token_expired(token)
+spotipy.oauth2.SpotifyOAuth(client_id='shhhhhigne')
+spotipy.oauth2.SpotifyOAuth(os.environ.get('SPOTIPY_CLIENT_ID'), os.environ.get('SPOTIPY_CLIENT_SECRET'), os.environ.get('SPOTIPY_REDIRECT_URI'))
+ziggy_client = spotipy.oauth2.SpotifyOAuth(os.environ.get('SPOTIPY_CLIENT_ID'), os.environ.get('SPOTIPY_CLIENT_SECRET'), os.environ.get('SPOTIPY_REDIRECT_URI'))
+ziggy_client.get_access_token()
+ziggy_client.get_access_token(token)
+ztok = 'AQCTW1FT6A6s3cqeLUc7QLGtFAZ7A9M3t0Uan6Hq-53PbE1hkFL_KLXyXw4Nb8nQ-XgBKwnwhOXeViS7fxla_9QG76hOWUx816TuIv7GmXrY_s27Nv3PnbEmkKqgw-k45I84IiTigx4_LuPEse5H_vT4fK-vbhspoUt2NARYnpHWE5obOWnPNbh-cQ'
+ziggy_client.get_access_token(ztok)

@@ -120,7 +120,7 @@ class PlaylistSong(db.Model):
 
     ps_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    playlist_id = db.Column(db.Integer, db.ForeignKey("playlists.playlist_id"), nullable=False)
+    playlist_id = db.Column(db.Integer, db.ForeignKey("PlaylistSong.playlist_id"), nullable=False)
     song_id = db.Column(db.Integer, db.ForeignKey("songs.song_id"), nullable=False)
 
     # status can be (active, requested, or deleted) -- if never added to playlist not issue
@@ -162,6 +162,28 @@ class Vote(db.Model):
 
 ##############################################################################
 # Helper functions
+import sys
+import spotipy
+import spotipy.util as util
+
+def pull_all_playlists():
+    pass
+
+    # scope ='user-library-read'
+
+    # username = 'ZZZeldaH'
+
+    # token = util.prompt_for_user_token(username, scope)
+
+    # if token:
+    #     sp = spotify.Spotify(auth=token)
+    #     results = sp.user_playlists()
+    
+    # return results
+
+
+
+
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""

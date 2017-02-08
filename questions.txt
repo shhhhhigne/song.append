@@ -1,0 +1,4 @@
+test data
+
+    what all should I store and what should spotify? how should I pull it
+    how to set up a seed.py file with JSON
