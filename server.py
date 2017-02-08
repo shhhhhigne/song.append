@@ -9,7 +9,9 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
 from model import User, Group, UserGroup, Playlist, Song, PlaylistSong, Vote
-from model import connect_to_db, db, pull_all_playlists
+from model import connect_to_db, db
+
+from helper_functions import initialize_auth, create_playlist
 
 
 app = Flask(__name__)
@@ -28,6 +30,8 @@ def index():
     # a = jsonify([1,3])
     # playlists = pull_all_playlists()
     playlists = []
+    initialize_auth()
+
 
     return render_template("homepage.html",
                             playlists=playlists)
@@ -79,20 +83,20 @@ def register_process():
     return redirect("/")
 
 
-@app.route('/create-playlist')
-def create_playlist():
+@app.route('/create-playlist', methods=['POST'])
+def create_playlist_form():
 
     name = request.form.get('playlist-name')
 
-    playlist_object = User(name=name)
+    # playlist_object = User(name=name)
 
-    requests.post('https://api.spotify.com/v1/users/zzzeldah')
+    create_playlist(name)
 
-    # We need to add to the session or it won't ever be stored
-    db.session.add(playlist_object)
+    # # We need to add to the session or it won't ever be stored
+    # db.session.add(playlist_object)
 
-    # Once we're done, we should commit our work
-    db.session.commit()
+    # # Once we're done, we should commit our work
+    # db.session.commit()
 
     return redirect("/")
 

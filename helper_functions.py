@@ -1,5 +1,3 @@
-# shows a user's playlists (need to be authenticated via oauth)
-
 import pprint
 import sys
 import os
@@ -9,20 +7,51 @@ import spotipy
 
 import spotipy.util as util
 
+from datetime import datetime, timedelta
 
-if len(sys.argv) > 1:
-    username = sys.argv[1]
-else:
-    print("Whoops, need your username!")
-    print("usage: python user_playlists.py [username]")
-    sys.exit()
+SPOTIPY_CLIENT = spotipy.oauth2.SpotifyOAuth(os.environ.get('SPOTIPY_CLIENT_ID'),
+                                             os.environ.get('SPOTIPY_CLIENT_SECRET'),
+                                             os.environ.get('SPOTIPY_REDIRECT_URI'))
 
-token = util.prompt_for_user_token(username)
+sp_info = {}
 
-if token:
+def initialize_auth():
+
+    access_token_info = SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
+
+    now = datetime.now()
+    expiration = now + timedelta(hours=1)
+
+    sp_info.update({'access_token': access_token_info['access_token'],
+               'expiration_time': expiration})
+
+
+def get_token():
+    """ Returns the token
+
+    checks to see if the client is expired, if it is, refresh it, then pull token
+    from the SPOTIFY_CLIENT object
+    """
+
+    # if SPOTIPY_CLIENT._is_token_expired(sp_info could be the whole thing instead of what I have it):
+    #     SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
+    print sp_info
+    now = datetime.now()
+
+    if sp_info['expiration_time'] - now == timedelta(minutes=0):
+        initialize_auth()
+
+    token = sp_info['access_token']
+
+    return token
+
+
+def create_playlist(playlist_name):
+    """Create a playlist"""
+
+    token = get_token()
+
     sp = spotipy.Spotify(auth=token)
-    playlists = sp.user_playlists(username)
-    for playlist in playlists['items']:
-        print(playlist['name'])
-else:
-    print("Can't get token for", username)
+    playlist = sp.user_playlist_create('zzzeldah', playlist_name)
+
+    
