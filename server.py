@@ -11,7 +11,7 @@ import sqlalchemy
 from model import User, Group, UserGroup, Playlist, Song, PlaylistSong, Vote
 from model import connect_to_db, db
 
-from helper_functions import initialize_auth, create_playlist
+from spotipy_functions import initialize_auth, create_playlist, show_all_playlists
 
 
 app = Flask(__name__)
@@ -57,23 +57,29 @@ def register_process():
     lname = request.form.get('lname')
 
     try:
-        user_object = User.query.filter_by(email=username).one()
-        flash('User already exists, please sign in or use another email')
+        user_object = User.query.filter_by(email=email).one()
+        flash('Email already in use, please sign in or use another')
         return redirect('/register')
 
     except sqlalchemy.orm.exc.NoResultFound:
+        try:
+            user_object = User.query.filter_by(username=username).one()
+            flash('Username already exists, please sign in or use another')
+
+            return redirect('/register')
         # flash('user created: %s') % (username)
-        user_object = User(email=email,
-                           username=username,
-                           password=password,
-                           fname=fname,
-                           lname=lname)
+        except sqlalchemy.orm.exc.NoResultFound:
+            user_object = User(email=email,
+                               username=username,
+                               password=password,
+                               fname=fname,
+                               lname=lname)
 
-        # We need to add to the session or it won't ever be stored
-        db.session.add(user_object)
+            # We need to add to the session or it won't ever be stored
+            db.session.add(user_object)
 
-        # Once we're done, we should commit our work
-        db.session.commit()
+            # Once we're done, we should commit our work
+            db.session.commit()
 
     session['user_id'] = user_object.user_id
     session['logged_in'] = True
@@ -81,6 +87,67 @@ def register_process():
     print(session)
     flash("Logged In")
     return redirect("/")
+
+
+@app.route("/sign-in")
+def sign_in_form():
+    if session.get('logged_in') is True:
+        flash('user already signed in')
+        return redirect('/')
+    else:
+        return render_template("sign_in.html")
+
+
+@app.route("/sign-in", methods=["POST"])
+def sign_in_process():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    try:
+        user_object = User.query.filter_by(email=username).one()
+        if password == user_object.password:
+            pass   # login -- for clairty in code
+        else:
+            flash("Wrong Password")
+            return redirect('/sign-in')
+
+    except sqlalchemy.orm.exc.NoResultFound:
+        flash("Email not found, please try again or create a new account")
+        return redirect('/sign-in')
+
+    user_id = user_object.user_id
+    session['user_id'] = user_id
+    session['logged_in'] = True
+    session['email'] = user_object.email
+
+    print(session)
+    flash("Logged In")
+    return redirect("/user-page/" + str(user_id))
+
+
+@app.route('/logout')
+def logout_process():
+    if session.get('logged_in') is True:
+        del session['user_id']
+        del session['logged_in']
+        flash('logged out')
+    else:
+        flash('not logged in')
+
+    return redirect('/sign-in')
+
+
+@app.route('/user-page/<user_id>')
+def show_user_page(user_id):
+
+    user_object = User.query.filter_by(user_id=user_id).one()
+    playlists = show_all_playlists()
+    playlists_info = {}
+    for playlist in playlists['items']:
+        playlists_info[playlist['name']] = playlist['id']
+
+    return render_template('user_page.html',
+                           playlists_info=playlists_info)
 
 
 @app.route('/create-playlist', methods=['POST'])
@@ -100,6 +167,9 @@ def create_playlist_form():
 
     return redirect("/")
 
+@app.route('/get-playlist/<playlist_id>')
+def get_playlist(playlist_id):
+    pass
 
 
 

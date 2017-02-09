@@ -6,18 +6,11 @@
 
 <a href="/register">Sign UP</a>
 
-<a href="/login">Sign IN</a>
+<a href='/sign-in'>Sign IN</a>
 
-<form action='/create-playlist' method='POST' id='create-playlist'>
-    Playlist Name: <input type='text' name='playlist-name' id='playlist-name'>
-    <input type='submit' value='Submit'>
-</form>
+<a href='/logout'>Logout</a>
 
-<h3>Playlists</h3>
-<ul>
-{% for playlist in playlists %}
-    <li>{{ playlist.name }}</li>
-{% endfor %}
-</ul>
+
+
 
 {% endblock %}

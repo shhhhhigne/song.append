@@ -15,6 +15,8 @@ SPOTIPY_CLIENT = spotipy.oauth2.SpotifyOAuth(os.environ.get('SPOTIPY_CLIENT_ID')
 
 sp_info = {}
 
+username = 'zzzeldah'
+
 def initialize_auth():
 
     access_token_info = SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
@@ -38,6 +40,7 @@ def get_token():
     print sp_info
     now = datetime.now()
 
+    print type(sp_info['expiration_time'])
     if sp_info['expiration_time'] - now == timedelta(minutes=0):
         initialize_auth()
 
@@ -52,6 +55,19 @@ def create_playlist(playlist_name):
     token = get_token()
 
     sp = spotipy.Spotify(auth=token)
-    playlist = sp.user_playlist_create('zzzeldah', playlist_name)
+    playlist = sp.user_playlist_create(username, playlist_name)
+
+
+def show_user_playlists(playlist_names):
+    pass
+
+def show_all_playlists():
+
+    token = get_token()
+
+    sp = spotipy.Spotify(auth=token)
+    playlists = sp.user_playlists(username)
+
+    return playlists
 
     

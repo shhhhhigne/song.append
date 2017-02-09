@@ -120,7 +120,7 @@ class PlaylistSong(db.Model):
 
     ps_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    playlist_id = db.Column(db.Integer, db.ForeignKey("PlaylistSong.playlist_id"), nullable=False)
+    playlist_id = db.Column(db.Integer, db.ForeignKey("playlists.playlist_id"), nullable=False)
     song_id = db.Column(db.Integer, db.ForeignKey("songs.song_id"), nullable=False)
 
     # status can be (active, requested, or deleted) -- if never added to playlist not issue

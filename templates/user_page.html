@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}User Page{% endblock %}
+{% block content %}
+
+<h2>User Page</h2>
+
+
+<form action='/create-playlist' method='POST' id='create-playlist'>
+    Playlist Name: <input type='text' name='playlist-name' id='playlist-name'>
+    <input type='submit' value='Submit'>
+</form>
+
+<h3>Playlists</h3>
+<ul>
+{% for key, value in playlists_info.items() %}
+    <li><a href='/get-playlist'>{{ key }}</a></li>
+{% endfor %}
+</ul>
+
+
+
+
+<!-- <form action='/user-info-change' method='POST' id='info-change' class='user-info'>
+ -->
+<!-- <div class='user-info' id='password-change'>
+<form action='/old-password' method='POST' id='old-password-form' class='user-info'>
+    Password: <input type='text' name='old-password' id='old-password'>
+    <input type='submit' value='Submit'>
+</form>
+<form action='/new-info' method='POST' id='new-password-form' class='user-info'>    
+    New Password: <input type='password' name='new-password' id='new-password' disabled>
+    <input type='submit' value='Submit' id='change-pass-submit' disabled>
+</form>
+</div> -->
+
+   <!--  <br>
+    Age: <input type='number' name='age' id='age'>
+    <br>
+    ZipCode: <input type='text' name='zipcode' id='zipcode'>
+    <br>
+    <input type='submit' value='Submit'>
+</form> -->
+
+{% endblock %}
+
+{% block javascript %}user_setttings{% endblock %}
