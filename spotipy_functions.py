@@ -37,10 +37,8 @@ def get_token():
 
     # if SPOTIPY_CLIENT._is_token_expired(sp_info could be the whole thing instead of what I have it):
     #     SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
-    print sp_info
     now = datetime.now()
 
-    print type(sp_info['expiration_time'])
     if sp_info['expiration_time'] - now == timedelta(minutes=0):
         initialize_auth()
 
@@ -57,6 +55,8 @@ def create_playlist(playlist_name):
     sp = spotipy.Spotify(auth=token)
     playlist = sp.user_playlist_create(username, playlist_name)
 
+    print 'playlist id: ' + playlist['name'], playlist['id']
+
 
 def show_user_playlists(playlist_names):
     pass
@@ -70,4 +70,6 @@ def show_all_playlists():
 
     return playlists
 
+def get_playlist(playlist_id):
+    pass
     

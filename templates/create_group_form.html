@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Registration{% endblock %}
+{% block content %}
+
+<h1>Create Group</h1>
+
+<form method='POST' action='/create-group' id='group-name-form'>
+    Group Name: <input type='text' name='group-name' id='group-name'>
+    <input type='submit' name='Submit'>
+</form>
+
+
+
+
+{% endblock %}

@@ -54,6 +54,7 @@ class UserGroup(db.Model):
     ug_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey("groups.group_id"), nullable=False)
+    in_group = db.Column(db.Boolean, default=False, nullable=False)
 
     user = db.relationship("User", backref=db.backref("user-group", order_by=ug_id))
     group = db.relationship("Group", backref=db.backref("user-group", order_by=ug_id))
@@ -76,7 +77,14 @@ class Playlist(db.Model):
 
     # Will be used when user first loads playlist and when they add/req songs
     # The user_id will be hard coded into
-    playlist_url = db.Column(db.String(300), nullable=False, unique=True)
+    # playlist_url = db.Column(db.String(300), nullable=False, unique=True)
+
+    # This will contain only the active songs so when the user wants to listen to
+    # the full playlist they can on spotify )ie not only 30 sec previews
+    playlist_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
+    # This will be the full playlist (ie contain all songs ever added, deleted, requested)
+    # so my app can pull from spotify and see all the songs
+    playlist_spotify_id_full = db.Column(db.String(300), nullable=False, unique=True)
 
     num_votes_add = db.Column(db.Integer, nullable=False, default=3) 
     num_votes_del = db.Column(db.Integer, nullable=False, default=3) 
