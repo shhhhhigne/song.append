@@ -1,4 +1,4 @@
-
+"use strict";
 
 
 
@@ -18,30 +18,51 @@ function updateGroupUsers(evt) {
 
     evt.preventDefault();
 
-    var checkboxes = $(':checkbox')
+    var checkboxes = $(':checkbox');
 
-    // var users = {}
+    var users = {}
 
-    // for (i=0; i<checkboxes.length; i++) {
-    //     users[checkboxes[i]['value']] = {'user_id': checkboxes[i]['value'],
-    //                                      'member': checkboxes[i].checked };
-    // }
+    for (var i=0; i<checkboxes.length; i++) {
+        users[checkboxes[i]['value']] = {'user_id': checkboxes[i]['value'],
+                                         'member': checkboxes[i].checked };
+    }
 
+    console.log('heehehehehehehheheheheh')
     console.log(users)
-    // i probably need to jsonify
 
-    // var formInputs = {'users': users,
-    //                   // 'group_id': $('#group_id')
-    // };
+    var formInputs = {'users': users    //                   'group_id': $('#group_id')
+    };
 
-    var formInputs = {'users': 'meme'};
+    // var formInputs = {"users": {"user1": "hey"}}
+    // console.log(formInputs)
+    // console.log(JSON.stringify(formInputs))
+    // console.log(typeof(JSON.stringify(formInputs)))
 
-    var url = '/add-to-group/' + $('#group_id')
-    $.post(url,
-           formInputs,
-           usersAddedAlert
-           );
+
+
+    // var formInputs = {'users': 'meme'};
+
+    // var group_id = 
+
+    // console.log(typeof($('#group-id').val()))
+    var url = '/add-to-group/' + $('#group-id').val();
+
+
+    // $.post(url,
+    //        JSON.stringify(formInputs),
+    //        usersAddedAlert
+    //        );
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: url,
+        data: JSON.stringify(formInputs),
+        success: usersAddedAlert,
+        dataType: "json"
+    });
+
 }
 
 
-$('#add-users-form').on('sumbit', updateGroupUsers);
+$('#add-users-form').on('submit', updateGroupUsers);

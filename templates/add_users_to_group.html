@@ -5,7 +5,7 @@
 <h1>Add Users to {{group.group_name}}</h1>
 
 <form id='add-users-form' method="POST">
-    <input type='hidden' name='group_id' value='{{ group.group_id }}'>
+    <input type='hidden' name='group_id' id='group-id' value='{{ group.group_id }}'>
     {% for key, value in users.items() %}
         <input type='checkbox' name='user' value='{{ key }}' id='{{ key }}' 
             {% if value['member'] == True %}checked{% endif %}>

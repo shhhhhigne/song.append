@@ -189,7 +189,6 @@ def create_group_form():
 def create_group():
 
     name = request.form.get('group-name')
-    print 'group name: ' + name
 
     group_object = Group(group_name=name)
 
@@ -198,7 +197,6 @@ def create_group():
     db.session.commit()
 
     group_id = group_object.group_id
-    print group_id
 
     return redirect('/add-to-group/' + str(group_id))
 
@@ -209,7 +207,7 @@ def add_to_group_form(group_id):
 
     user_objects = User.query.all()
 
-    group_users = UserGroup.query.filter_by(group_id=group_id).all()
+    group_users = UserGroup.query.filter_by(group_id=group_id).filter_by(in_group=True).all()
 
     users = {}
 
@@ -219,9 +217,7 @@ def add_to_group_form(group_id):
                                'member': False}
 
     for user in group_users:
-        user[group_users.user_id][member] = True
-
-    print users
+        users[user.user_id]['member'] = True
 
     return render_template('add_users_to_group.html',
                            group=group_object,
@@ -230,15 +226,10 @@ def add_to_group_form(group_id):
 @app.route('/add-to-group/<group_id>', methods=['POST'])
 def update_users_in_group(group_id):
 
-    users = request.form.getlist('users')
-    # print 'users: ' + users
-    # group_id = request.form.get('group_id')
+    users = request.json['users']
 
-    print "****", users
-    print "type:", type(users)
-
-    for user in users:
-        user_id = user[user_id] 
+    for user in users.values():
+        user_id = user['user_id'] 
         try:
             ug_object = UserGroup.query.filter_by(user_id=user_id).filter_by(group_id=group_id).one()
             if user['member'] == True:
@@ -248,7 +239,7 @@ def update_users_in_group(group_id):
 
             #ug_object.in_group = True if user['member'] == True else False
 
-        except NoResultFound:
+        except sqlalchemy.orm.exc.NoResultFound:
             if user['member'] == True:
                 ug_object = UserGroup(user_id=user_id,
                                       group_id=group_id,
@@ -256,6 +247,14 @@ def update_users_in_group(group_id):
             else:
                 ug_object = UserGroup(user_id=user_id,
                                       group_id=group_id)
+
+            db.session.add(ug_object)
+
+        db.session.commit()
+
+
+
+    return 'success'
 
 
 
