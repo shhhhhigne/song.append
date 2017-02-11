@@ -172,6 +172,16 @@ def create_playlist_form():
 
     return redirect("/")
 
+@app.route('/get-all-playlists')
+def show_playlist_list():
+    playlists = show_all_playlists()
+    playlists_info = {}
+    for playlist in playlists['items']:
+        playlists_info[playlist['id']] = playlist['name']
+
+    return playlists_info
+
+
 @app.route('/get-playlist/<playlist_id>')
 def show_playlist(playlist_id):
     

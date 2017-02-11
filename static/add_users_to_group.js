@@ -27,31 +27,11 @@ function updateGroupUsers(evt) {
                                          'member': checkboxes[i].checked };
     }
 
-    console.log('heehehehehehehheheheheh')
-    console.log(users)
-
     var formInputs = {'users': users    //                   'group_id': $('#group_id')
     };
 
-    // var formInputs = {"users": {"user1": "hey"}}
-    // console.log(formInputs)
-    // console.log(JSON.stringify(formInputs))
-    // console.log(typeof(JSON.stringify(formInputs)))
-
-
-
-    // var formInputs = {'users': 'meme'};
-
-    // var group_id = 
-
     // console.log(typeof($('#group-id').val()))
     var url = '/add-to-group/' + $('#group-id').val();
-
-
-    // $.post(url,
-    //        JSON.stringify(formInputs),
-    //        usersAddedAlert
-    //        );
 
     $.ajax({
         type: "POST",
