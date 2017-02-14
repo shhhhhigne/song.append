@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Registration{% endblock %}
+{% block title %}Create Playlist{% endblock %}
 {% block content %}
 
-<h1 class='current-page' value='create-playlist'>Create Group</h1>
+<h1 class='current-page' value='create-playlist'>Create Playlist</h1>
 
-<form method='POST' action='/create-playlist' id='group-name-form'>
+<form method='POST' action='/create-playlist' id='playlist-name-form'>
     Playlist Name: <input type='text' name='playlist-name' id='playlist-name'
     {% if playlist_exists %} value='playlist.name' {% endif %}>
     <br>

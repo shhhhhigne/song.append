@@ -13,7 +13,7 @@ import re
 from model import User, Group, UserGroup, Playlist, Song, PlaylistSong, Vote
 from model import connect_to_db, db
 
-from spotipy_functions import initialize_auth, create_playlist, show_all_playlists
+from spotipy_functions import initialize_auth, create_playlist, show_all_playlists, search
 
 from helper_functions import (get_user_groups,
                               get_user_owned_playlists, 
@@ -376,6 +376,18 @@ def update_users_in_group(group_id):
 
 
     return 'success'
+
+
+
+@app.route('/search', methods=['GET'])
+def show_search_results():
+
+    user_input = request.args.get('search-str')
+
+    results = search(user_input)
+
+    return render_template(results.html,
+                           results=results)
 
 
 

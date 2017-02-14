@@ -73,4 +73,12 @@ def show_all_playlists():
 
 def get_playlist(playlist_id):
     pass
+
+
+def search(user_input):
+
+    sp = spotipy.Spotify()
+    result = sp.search(user_input)
+
+    return result
     
