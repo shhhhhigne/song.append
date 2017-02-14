@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Registration{% endblock %}
+{% block content %}
+
+<h1 class='current-page' value='create-playlist'>Create Group</h1>
+
+<form method='POST' action='/create-playlist' id='group-name-form'>
+    Playlist Name: <input type='text' name='playlist-name' id='playlist-name'
+    {% if playlist_exists %} value='playlist.name' {% endif %}>
+    <br>
+    Group: <select name='group' class='dropdown'>
+        {% for group in groups %}
+            {% if playlist_exists %}
+                {% if playlist.group_id == group.group_id %}
+                <option id='{{ group.group_id }}' value='{{ group.group_id }}' selected='selected'>{{ group.group_name }}</option>
+                {% endif %}
+            {% else %}
+                <option id='{{ group.group_id }}' value='{{ group.group_id }}''>{{ group.group_name }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+    <br>
+    Rules: <br>
+        Number of Votes to Add Song: <input type='number' name='num-to-add' id='num-to-add' placeholder="3">
+        <br>
+        Number of Votes to Delete Song: <input type='number' name='num-to-del' id='num-to-del' placeholder="3">
+        <br>
+    Songs: <br>
+        Add Song ----Button, complete
+        List of songs ----list, complete
+            
+    <input type='submit' name='Submit'>
+</form>
+
+
+
+
+{% endblock %}

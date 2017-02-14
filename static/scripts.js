@@ -11,28 +11,111 @@ $(document).ready(function () {
 
 
 
-function populateDropDown(playlist_info) {
+function populateDropDownOwned(playlist_info) {
 
-    for (var [name, value] of Iterator(playlist_info)) {
+    for (playlist_id in playlist_info) {
+        var playlist_name = playlist_info[playlist_id];
     
-        var newItem = $('<li>');
-        var newItemLink = newItem.append($('<a>'));
+        console.log(`playlist name = ${playlist_name}`)
 
+         newItem = $('<li>');
+         newItemLink = $('<a>', { href: '/get-playlist/'+playlist_id,
+                                  value: playlist_id
 
-        console.log(value)
-        console.log(name)
-        // newItem.addClass('nav-playlist-'+playlist['id'])
+        });
+        newItem.append(newItemLink);
 
-    //     newItemLink.append();
-    //     newItem.addClass('dropdown-playlist');
-    //     newItemLink.attr('value') = playlist['id'];
-    //     newItemLink.attr('href') = '/get-playlist/'+playlist['id'];
+        newItemLink.text(playlist_name);
+        newItem.addClass('dropdown-playlist');
+
+        $('#dropdown-playlist-menu').append(newItem)
     }
 }
 
-function getAllPlaylists() {
-    $.get('/get-all-playlists',
-          populateDropDown);
+function getOwnedPlaylists() {
+    console.log('get all p')
+    $.get('/get-user-owned-playlists',
+          populateDropDownOwned);
 }
 
-getAllPlaylists();
+getOwnedPlaylists();
+
+
+function populateDropDownBelong(playlist_info) {
+
+    $('#dropdown-playlist-menu').append('<li role="separator" class="divider"></li>');
+    $('#dropdown-playlist-menu').append('<li class="dropdown-header owned-playlists">Belong to Playlists</li>')
+
+
+    for (playlist_id in playlist_info) {
+        var playlist_name = playlist_info[playlist_id];
+    
+        console.log(`playlist name = ${playlist_name}`)
+
+         newItem = $('<li>');
+         newItemLink = $('<a>', { href: '/get-playlist/'+playlist_id,
+                                  value: playlist_id
+
+        });
+        newItem.append(newItemLink);
+
+        newItemLink.text(playlist_name);
+        newItem.addClass('dropdown-playlist');
+       
+        $('#dropdown-playlist-menu').append(newItem)
+    }
+}
+
+function getBelongingPlaylists() {
+    console.log('get all p')
+    $.get('/get-user-belonging-playlists',
+          populateDropDownBelong);
+}
+
+getBelongingPlaylists();
+
+
+function populateDropDownGroups(group_info) {
+    console.log('popu')
+
+    console.log(group_info)
+
+    for (group_id in group_info) {
+        var group_name = group_info[group_id];
+    
+        console.log(`group name = ${group_name}`)
+
+         newItem = $('<li>');
+         newItemLink = $('<a>', { href: '/add-to-group/'+group_id,
+                                  value: group_id
+
+        });
+         newItem.append(newItemLink);
+
+         // newItemLink.createAttribute('href');
+
+
+         // newItemLink.href = '/get-playlist/'+playlist_id;
+         // newItemLink = newItem.append($('<a>', { href: '/get-playlist/'+playlist_id.href }));
+
+
+    
+        // newItem.addClass('nav-playlist-'+playlist['id'])
+
+        newItemLink.text(group_name);
+        newItem.addClass('dropdown-group');
+        // newItemLink.attr('value') = playlist_id;
+        // newItemLink.attr('href') = '/get-playlist/'+playlist_id;
+
+       
+        $('#dropdown-group-menu').append(newItem)
+    }
+}
+
+function getGroups() {
+    console.log('get all p')
+    $.get('/get-user-belonging-groups',
+          populateDropDownGroups);
+}
+
+getGroups();

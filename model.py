@@ -90,7 +90,7 @@ class Playlist(db.Model):
     num_votes_del = db.Column(db.Integer, nullable=False, default=3) 
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    group_id = db.Column(db.Integer, db.ForeignKey("groups.group_id"), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.group_id"), nullable=True)
 
     user = db.relationship("User", backref=db.backref("playlists", order_by=playlist_id))
     group = db.relationship("Group", backref=db.backref("playlists", order_by=playlist_id))
@@ -208,6 +208,8 @@ if __name__ == "__main__":
 
     from server import app
     connect_to_db(app)
+
+    db.create_all()
     print "Connected to DB."
 
 

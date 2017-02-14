@@ -56,6 +56,7 @@ def create_playlist(playlist_name):
     playlist = sp.user_playlist_create(username, playlist_name)
 
     print 'playlist id: ' + playlist['name'], playlist['id']
+    return playlist['id']
 
 
 def show_user_playlists(playlist_names):

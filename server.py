@@ -8,10 +8,17 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
+import re
+
 from model import User, Group, UserGroup, Playlist, Song, PlaylistSong, Vote
 from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists
+
+from helper_functions import (get_user_groups,
+                              get_user_owned_playlists, 
+                              get_user_belonging_playlists,
+                              get_playlist_songs)
 
 
 app = Flask(__name__)
@@ -150,6 +157,17 @@ def show_user_page(user_id):
                            playlists_info=playlists_info)
 
 
+@app.route('/create-playlist')
+def show_create_playlist_form():
+
+    user_id = session['user_id']
+
+    groups = get_user_groups(user_id)
+
+    return render_template('create_playlist.html',
+                            groups=groups,
+                            playlist_exists=False)
+
 @app.route('/create-playlist', methods=['POST'])
 def create_playlist_form():
 
@@ -159,6 +177,25 @@ def create_playlist_form():
 
     playlist_spotify_id = create_playlist(name)
     playlist_spotify_id_full = create_playlist(name_full)
+
+    user_id = session['user_id']
+
+    group_id = request.form.get('group')
+
+    num_to_add = request.form.get('num-to-add') or None
+    num_to_del = request.form.get('num-to-del') or None
+
+    playlist_object = Playlist(playlist_name=name,
+                               playlist_spotify_id=playlist_spotify_id,
+                               playlist_spotify_id_full=playlist_spotify_id_full,
+                               num_votes_add=num_to_add,
+                               num_votes_del=num_to_del,
+                               group_id=group_id,
+                               user_id=user_id)
+
+    db.session.add(playlist_object)
+
+    db.session.commit()
 
 
 
@@ -172,22 +209,81 @@ def create_playlist_form():
 
     return redirect("/")
 
+
+
 @app.route('/get-all-playlists')
 def show_playlist_list():
-    playlists = show_all_playlists()
-    playlists_info = {}
-    for playlist in playlists['items']:
-        playlists_info[playlist['id']] = playlist['name']
+    # playlists = show_all_playlists()
+    # playlists_info = {}
+    # for playlist in playlists['items']:
+    #     if not playlist['name'].endswith('_full'):
+    #         playlists_info[playlist['id']] = playlist['name']
+    # return jsonify(playlists_info)
 
-    return playlists_info
+    # user_id = session['user_id']
+    # users_groups = UserGroup.query.filter_by(user_id=user_id).all()
+    # for users_group in users_groups:
+    #     user_playlists = Playlist.query.filter_by(group_id=users_group.group_id).all()
+
+    # return jsonify(user_playlists)
+    pass
+
+
+@app.route('/get-user-owned-playlists')
+def show_user_owned_playlists():
+
+    user_id = session['user_id']
+
+    playlists = get_user_owned_playlists(user_id)
+    print "++++++++++", playlists
+
+    user_playlists = {}
+
+    for playlist in playlists:
+        user_playlists[playlist.playlist_id] = playlist.playlist_name
+
+
+    return jsonify(user_playlists)
+
+
+@app.route('/get-user-belonging-playlists')
+def show_user_belonging_playlists():
+
+    user_id = session['user_id']
+
+    playlists = get_user_belonging_playlists(user_id)
+    print "!!!!!!!!!!!!!", playlists
+
+    user_playlists = {}
+
+    for playlist in playlists:
+        print 'playlist *****', playlist
+        user_playlists[playlist.playlist_id] = playlist.playlist_name
+
+    print 'user_playlists *********', user_playlists
+
+
+    return jsonify(user_playlists)
+
+    
+
+
 
 
 @app.route('/get-playlist/<playlist_id>')
 def show_playlist(playlist_id):
+
+    playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
+    playlist_name = playlist_object.playlist_name
+
+    songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
+    print songs
     
     # playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
     # playlist = get
-    pass
+    return render_template('playlist.html',
+                           playlist_object=playlist_object
+                           )
 
 @app.route('/create-group')
 def create_group_form():
@@ -209,6 +305,21 @@ def create_group():
     group_id = group_object.group_id
 
     return redirect('/add-to-group/' + str(group_id))
+
+@app.route('/get-user-belonging-groups')
+def show_user_belonging_groups():
+    user_id = session['user_id']
+
+    groups = get_user_groups(user_id)
+
+    user_groups = {}
+
+    for group in groups:
+        user_groups[group.group_id] = group.group_name
+
+
+    return jsonify(user_groups)
+
 
 @app.route('/add-to-group/<group_id>', methods=['GET'])
 def add_to_group_form(group_id):

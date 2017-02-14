@@ -40,15 +40,23 @@
         {% if 'logged_in' in session %}
         <li class="dropdown" id='playlist-dropdown'>
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Playlists <span class="caret"></span></a>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" id='dropdown-playlist-menu'>
             <li><a href="/create-playlist">+ New Playlist</a></li>
             <li role="separator" class="divider"></li>
-
+            <li class='dropdown-header owned-playlists'>Owned Playlists</li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if 'logged_in' in session %}
+        <li class="dropdown" id='group-dropdown'>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Groups <span class="caret"></span></a>
+          <ul class="dropdown-menu" id='dropdown-group-menu'>
+            <li><a href="/create-group">+ New Group</a></li>
+            <li role="separator" class="divider"></li>
             
           </ul>
         </li>
         {% endif %}
-        <li><a href="/users">Users</a></li>
       
       </ul>
       <form class="navbar-form navbar-left" action='/search'>
