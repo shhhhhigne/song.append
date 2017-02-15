@@ -42,7 +42,7 @@
                 <td>
                     <span class="dropdown">
                     <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="playlist-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
-                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="playlist-dropdown">
+                    <ul class="dropdown-menu dropdown-menu-right track-playlist-dropdown" aria-labelledby="playlist-dropdown">
                         <li><a href="/create-playlist">+ New Playlist</a></li>
                         <li role="separator" class="divider"></li>
                         <li class='dropdown-header owned-playlists'>Owned Playlists</li>
@@ -60,3 +60,5 @@
 
 
 {% endblock %}
+
+{% block javascript %}tracks{% endblock %}
