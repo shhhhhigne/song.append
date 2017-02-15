@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Search results{% endblock %}
+
+{% block content %}
+
+<h2 class='current-page' value='results'>Results</h2>
+
+{% for key, value in results.items() %}
+    <ul>
+    {% if value != None %}
+        <li><h4>{{ key|title }}:</h4></li>
+        <ul>
+        {% for id,item in value.items() %}
+            <li>
+            <span class="dropdown">
+                <span class="glyphicon glyphicon-play-circle dropdown-toggle" id="playDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <ul class="dropdown-menu" aria-labelledby="playDropdown">
+                    <li><a href="#">Play 30 sec Preview</a></li>
+                    <li><a href="#">Play Full Song on Spotify</a></li>
+                </ul> 
+
+            <a href='/{{ key }}/{{ id }}'>{{ item }}</a>
+
+            <span class="dropdown">
+                <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="/create-playlist">+ New Playlist</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li class='dropdown-header owned-playlists'>Owned Playlists</li>
+                </ul>
+            </span>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    </ul>
+{% endfor %}
+
+
+{% endblock %}

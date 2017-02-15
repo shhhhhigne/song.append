@@ -26,7 +26,6 @@ def get_user_groups(user_id):
         if users_group.in_group:
             group = Group.query.filter_by(group_id=users_group.group_id).one()
             groups.append(group)
-            print group
         else:
             print "not in ", users_group.group_id
 

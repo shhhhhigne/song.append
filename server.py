@@ -235,7 +235,6 @@ def show_user_owned_playlists():
     user_id = session['user_id']
 
     playlists = get_user_owned_playlists(user_id)
-    print "++++++++++", playlists
 
     user_playlists = {}
 
@@ -252,15 +251,12 @@ def show_user_belonging_playlists():
     user_id = session['user_id']
 
     playlists = get_user_belonging_playlists(user_id)
-    print "!!!!!!!!!!!!!", playlists
 
     user_playlists = {}
 
     for playlist in playlists:
-        print 'playlist *****', playlist
         user_playlists[playlist.playlist_id] = playlist.playlist_name
 
-    print 'user_playlists *********', user_playlists
 
 
     return jsonify(user_playlists)
@@ -277,10 +273,8 @@ def show_playlist(playlist_id):
     playlist_name = playlist_object.playlist_name
 
     songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
-    print songs
     
-    # playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
-    # playlist = get
+
     return render_template('playlist.html',
                            playlist_object=playlist_object
                            )
@@ -386,7 +380,7 @@ def show_search_results():
 
     results = search(user_input)
 
-    return render_template(results.html,
+    return render_template('search_results.html',
                            results=results)
 
 
