@@ -82,8 +82,11 @@ class Playlist(db.Model):
     # This will contain only the active songs so when the user wants to listen to
     # the full playlist they can on spotify )ie not only 30 sec previews
     playlist_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
-    # This will be the full playlist (ie contain all songs ever added, deleted, requested)
-    # so my app can pull from spotify and see all the songs
+    #This will contain only the requested songs incase the user wishes to listen to 
+    # the playlist of the requested songs
+    playlist_spotify_id_req = db.Column(db.String(300), nullable=False, unique=True)
+    # This will be the full playlist (ie contain all songs ever added and requested)
+    # if a user wishes to listen to the full list
     playlist_spotify_id_full = db.Column(db.String(300), nullable=False, unique=True)
 
     num_votes_add = db.Column(db.Integer, nullable=False, default=3) 
@@ -102,6 +105,22 @@ class Playlist(db.Model):
         return s % (self.playlist_id, self.playlist_name, self.user_id, self.group_id)
 
 
+class Album(db.Model):
+
+    __tablename__ = 'albums'
+
+    album_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    album_name = db.Column(db.String(64), nullable=False)
+
+    album_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
+    album_spotify_url = db.Column(db.String(300), nullable=False, unique=True)
+
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        return "<Album album_id=%s album_name=%s>" % (self.album_name, self.album_id)
+
+
 class Song(db.Model):
     """Songs in curated playlist app"""
 
@@ -109,16 +128,59 @@ class Song(db.Model):
 
     song_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     song_name = db.Column(db.String(64), nullable=False)
-    artist = db.Column(db.String(64), nullable=False)
-    album = db.Column(db.String(64), nullable=False)
 
+    album_id = db.Column(db.Integer, db.ForeignKey("albums.album_id"), nullable=False)
+
+    # So I can check if the song is already in my database
+    song_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
+    # Used to find the 30 second preview of the song
+    preview_url = db.Column(db.String(300), nullable=False, unique=True)
     # Used to find the song in the spotify database
     spotify_url = db.Column(db.String(300), nullable=False, unique=True)
+
+    album = db.relationship("Album", backref=db.backref("songs", order_by=song_id))
 
     def __repr__(self):
         """Provide helpful representation when printed"""
 
         return "<Song song_id=%s song_name=%s>" % (self.song_name, self.song_id)
+
+
+class Artist(db.Model):
+    """Artists in curated playlist app"""
+
+    __tablename__ = 'artists'
+
+    artist_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    artist_name = db.Column(db.String(64), nullable=False)
+
+    artist_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
+    artist_spotify_url = db.Column(db.String(300), nullable=False, unique=True)
+
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        return "<Artist artist_id=%s artist_name=%s>" % (self.artist_name, self.artist_id)
+
+
+class SongArtist(db.Model):
+    """Song/Artist relationship in curated playlist app."""
+
+    __tablename__ = "song-artist"
+
+    sartist_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+
+    song_id = db.Column(db.Integer, db.ForeignKey("songs.song_id"), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey("artists.artist_id"), nullable=False)
+
+    song = db.relationship("Song", backref=db.backref("song-artist", order_by=sartist_id))
+    artist = db.relationship("Artist", backref=db.backref("song-artist", order_by=sartist_id))
+
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        s = "<SongArtist sartist_id=%s song_id=%s artist_id=%s>"
+        return s % (self.sartist_id, self.song_id, self.artist_id)
 
 
 class PlaylistSong(db.Model):
@@ -144,7 +206,7 @@ class PlaylistSong(db.Model):
         """Provide helpful representation when printed"""
 
         s = "<PlaylistSong ps_id=%s playlist_id=%s song_id=%s status=%s index=%s>"
-        return s % (self.ps_id, self.playlist_name, self.song_id, self.status, self.index)
+        return s % (self.ps_id, self.playlist_id, self.song_id, self.status, self.index)
 
 
 class Vote(db.Model):

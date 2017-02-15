@@ -10,7 +10,8 @@ import sqlalchemy
 
 import re
 
-from model import User, Group, UserGroup, Playlist, Song, PlaylistSong, Vote
+from model import Album, Song, Artist, SongArtist
+from model import User, Group, UserGroup, Playlist, PlaylistSong, Vote
 from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists, search
@@ -172,10 +173,13 @@ def show_create_playlist_form():
 def create_playlist_form():
 
     name = request.form.get('playlist-name')
+    name_req = name + '_req'
     name_full = name + '_full'
     # playlist_object = User(name=name)
 
     playlist_spotify_id = create_playlist(name)
+    playlist_spotify_id_req = create_playlist(name_req)
+
     playlist_spotify_id_full = create_playlist(name_full)
 
     user_id = session['user_id']
@@ -187,6 +191,7 @@ def create_playlist_form():
 
     playlist_object = Playlist(playlist_name=name,
                                playlist_spotify_id=playlist_spotify_id,
+                               playlist_spotify_id_req=playlist_spotify_id_req,
                                playlist_spotify_id_full=playlist_spotify_id_full,
                                num_votes_add=num_to_add,
                                num_votes_del=num_to_del,
@@ -208,6 +213,47 @@ def create_playlist_form():
     # db.session.commit()
 
     return redirect("/")
+
+@app.route('/add-song-to-playlist', methods=['POST'])
+def add_song_to_playlist(song_id, playlist_id):
+
+    try:
+        song_in_playlist = PlaylistSong.query.filter_by(song_id=song_object.song_id).one()
+
+        # Later I will want to change this so that when you add a song already in the playlist
+        # it will check if youve already voted on it and if you have then you cant, otherwise
+        # add one to the vote 
+        flash("This song is already in the playlist")
+
+    except sqlalchemy.orm.exc.NoResultFound:
+
+        playlist_song_object = PlaylistSong()
+
+
+
+
+    pass
+
+
+# @app.route('/playlist/<playlist_id>')
+# def show_playlist(playlist_id):
+
+#     playlist = Playlist.query.filter_by(playlist_id).one()
+
+#     songs = get_playlist_songs(playlist_id)
+
+#     user_id = session['user_id']
+
+#     if playlist.user_id == user_id:
+#         #theyre not actually creating this, I might want to refactor this somehow
+#         page = 'create_playlist.html'
+
+#     else:
+#         page = 'playlist.html'
+
+#     return render_template(page,
+#                            playlist=playlist,
+#                            songs=songs)
 
 
 

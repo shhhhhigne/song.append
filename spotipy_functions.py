@@ -9,6 +9,8 @@ import spotipy.util as util
 
 from datetime import datetime, timedelta
 
+from add_to_db_helper import add_song_to_db, add_artist_to_db
+
 SPOTIPY_CLIENT = spotipy.oauth2.SpotifyOAuth(os.environ.get('SPOTIPY_CLIENT_ID'),
                                              os.environ.get('SPOTIPY_CLIENT_SECRET'),
                                              os.environ.get('SPOTIPY_REDIRECT_URI'))
@@ -110,8 +112,14 @@ def get_track_info(item):
 
     artists = []
     for artist in item['artists']:
-        artist_info = {'artist_id': artist['id'],
-                       'artist_name': artist['name']}
+        artist_info = {'artist_spotify_id': artist['id'],
+                       'artist_name': artist['name'],
+                       'artist_url': artist['external_urls']['spotify']}
+
+
+        artist_info['artist_id'] = add_artist_to_db(artist_info)
+
+
         artists.append(artist_info)
 
 
@@ -120,11 +128,12 @@ def get_track_info(item):
                   'preview': item['preview_url'],
                   'spotify_url': item['external_urls']['spotify'],
                   'artists': artists,
-                  # 'artist_url': item['artist']['external_urls']['spotify']
                   'album_id': item['album']['id'],
-                  'album_name': item['album']['name']
-                  # 'artist_url': item['artist']['external_urls']['spotify']
+                  'album_name': item['album']['name'],
+                  'album_url': item['album']['external_urls']['spotify']
     }
+
+    add_song_to_db(track_info)
     return track_info
 
 

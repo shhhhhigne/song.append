@@ -56,9 +56,15 @@ def get_user_belonging_playlists(user_id):
 
 def get_playlist_songs(playlist_id):
 
+    playlist_songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
+
+    return playlist_songs
 
 
-    songs = []
-    return songs
+
+
+
+
+
 
 

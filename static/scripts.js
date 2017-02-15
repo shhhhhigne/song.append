@@ -9,7 +9,44 @@ $(document).ready(function () {
 
 });
 
+var audioPlayer;
+var playing_id;
+var playing = false; 
 
+var x
+
+// TODO: make click and hold play pop up menu and single click play preview
+function setAudioState() {
+    x = event
+    var evt = event;
+
+    if (audioPlayer == null) {
+        audioPlayer = new Audio();
+    }
+
+    if (playing_id != null && playing_id != evt.target.id) {
+        // $('#playing_id').removeClass('is_playing');
+
+        $('#'+playing_id).removeClass('glyphicon glyphicon-pause')
+        $('#'+playing_id).removeClass('glyphicon glyphicon-play-circle')
+    }
+
+    $('#'+evt.target.id).addClass('glyphicon glyphicon-pause')
+
+    // var state = evt.target.is_playing;
+
+
+
+    // if (playing == false) {
+    //     if (playing_id == id) {
+    //         playing = true;
+
+    //     }
+    // }
+}
+
+$('.play-button').on('click', setAudioState);
+// $('')
 
 function populateDropDownOwned(playlist_info) {
 
