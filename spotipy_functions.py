@@ -123,17 +123,19 @@ def get_track_info(item):
         artists.append(artist_info)
 
 
-    track_info = {'id': item['id'],
+    track_info = {'spotify_id': item['id'],
                   'name': item['name'],
                   'preview': item['preview_url'],
                   'spotify_url': item['external_urls']['spotify'],
                   'artists': artists,
-                  'album_id': item['album']['id'],
+                  'spotify_album_id': item['album']['id'],
                   'album_name': item['album']['name'],
                   'album_url': item['album']['external_urls']['spotify']
     }
 
-    add_song_to_db(track_info)
+    ids = add_song_to_db(track_info)
+    track_info['id'] = ids['song_id']
+    track_info['album_id'] = ids['album_id']
     return track_info
 
 
@@ -163,7 +165,7 @@ def search(user_input):
             # print '*******************tracks', tracks
             track_info = get_track_info(item)
             # print track_info
-            tracks[item['id']] = track_info
+            tracks[track_info['id']] = track_info
 
         all_results['tracks'] = tracks
 

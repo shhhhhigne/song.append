@@ -110,7 +110,7 @@ class Album(db.Model):
     __tablename__ = 'albums'
 
     album_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    album_name = db.Column(db.String(64), nullable=False)
+    album_name = db.Column(db.String(200), nullable=False)
 
     album_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
     album_spotify_url = db.Column(db.String(300), nullable=False, unique=True)
@@ -127,14 +127,14 @@ class Song(db.Model):
     __tablename__ = 'songs'
 
     song_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    song_name = db.Column(db.String(64), nullable=False)
+    song_name = db.Column(db.String(200), nullable=False)
 
     album_id = db.Column(db.Integer, db.ForeignKey("albums.album_id"), nullable=False)
 
     # So I can check if the song is already in my database
     song_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
     # Used to find the 30 second preview of the song
-    preview_url = db.Column(db.String(300), nullable=False, unique=True)
+    preview_url = db.Column(db.String(300), nullable=False)
     # Used to find the song in the spotify database
     spotify_url = db.Column(db.String(300), nullable=False, unique=True)
 
@@ -152,7 +152,7 @@ class Artist(db.Model):
     __tablename__ = 'artists'
 
     artist_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    artist_name = db.Column(db.String(64), nullable=False)
+    artist_name = db.Column(db.String(300), nullable=False)
 
     artist_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
     artist_spotify_url = db.Column(db.String(300), nullable=False, unique=True)

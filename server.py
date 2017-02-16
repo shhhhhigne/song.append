@@ -214,7 +214,7 @@ def create_playlist_form():
 
     return redirect("/")
 
-@app.route('/add-song-to-playlist', methods=['POST'])
+@app.route('/add-song-to-playlist/<song_id>/<playlist_id>', methods=['POST'])
 def add_song_to_playlist(song_id, playlist_id):
 
     try:
@@ -227,12 +227,14 @@ def add_song_to_playlist(song_id, playlist_id):
 
     except sqlalchemy.orm.exc.NoResultFound:
 
-        playlist_song_object = PlaylistSong()
+        playlist_song_object = PlaylistSong(song_id=song_id,
+                                            playlist_id=playlist_id)
+
+        flash(song_id + 'in playlist' + playlist_id)
 
 
-
-
-    pass
+    #this needs to be fixed, it needs to stay on the current page
+    return redirect('/')
 
 
 # @app.route('/playlist/<playlist_id>')
@@ -313,7 +315,7 @@ def show_user_belonging_playlists():
 
 
 @app.route('/get-playlist/<playlist_id>')
-def show_playlist(playlist_id):
+def get_playlist(playlist_id):
 
     playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
     playlist_name = playlist_object.playlist_name

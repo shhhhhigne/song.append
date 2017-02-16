@@ -53,7 +53,7 @@ function populateDropDownOwned(playlist_info) {
     for (playlist_id in playlist_info) {
         var playlist_name = playlist_info[playlist_id];
     
-        console.log(`playlist name = ${playlist_name}`)
+        // console.log(`playlist name = ${playlist_name}`)
 
          newItem = $('<li>');
          newItemLink = $('<a>', { href: '/get-playlist/'+playlist_id,
@@ -70,7 +70,6 @@ function populateDropDownOwned(playlist_info) {
 }
 
 function getOwnedPlaylists() {
-    console.log('get all p')
     $.get('/get-user-owned-playlists',
           populateDropDownOwned);
 }
@@ -87,7 +86,7 @@ function populateDropDownBelong(playlist_info) {
     for (playlist_id in playlist_info) {
         var playlist_name = playlist_info[playlist_id];
     
-        console.log(`playlist name = ${playlist_name}`)
+        // console.log(`playlist name = ${playlist_name}`)
 
          newItem = $('<li>');
          newItemLink = $('<a>', { href: '/get-playlist/'+playlist_id,
@@ -104,7 +103,6 @@ function populateDropDownBelong(playlist_info) {
 }
 
 function getBelongingPlaylists() {
-    console.log('get all p')
     $.get('/get-user-belonging-playlists',
           populateDropDownBelong);
 }
@@ -113,14 +111,14 @@ getBelongingPlaylists();
 
 
 function populateDropDownGroups(group_info) {
-    console.log('popu')
+    // console.log('popu')
 
-    console.log(group_info)
+    // console.log(group_info)
 
     for (group_id in group_info) {
         var group_name = group_info[group_id];
     
-        console.log(`group name = ${group_name}`)
+        // console.log(`group name = ${group_name}`)
 
          newItem = $('<li>');
          newItemLink = $('<a>', { href: '/add-to-group/'+group_id,
@@ -150,7 +148,6 @@ function populateDropDownGroups(group_info) {
 }
 
 function getGroups() {
-    console.log('get all p')
     $.get('/get-user-belonging-groups',
           populateDropDownGroups);
 }

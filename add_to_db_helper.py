@@ -15,10 +15,10 @@ from model import connect_to_db, db
 
 def add_song_to_db(track_info):
 
-    song_spotify_id = track_info['id']
+    song_spotify_id = track_info['spotify_id']
 
     try:
-        Song.query.filter_by(song_spotify_id=song_spotify_id).one()
+        song_object = Song.query.filter_by(song_spotify_id=song_spotify_id).one()
 
     except sqlalchemy.orm.exc.NoResultFound:
 
@@ -38,6 +38,9 @@ def add_song_to_db(track_info):
         for artist in track_info['artists']:
             song_artist_object = SongArtist(song_id=song_object.song_id,
                                             artist_id=artist['artist_id'])
+
+    return {'song_id': song_object.song_id,
+            'album_id': song_object.album_id}
 
 
 
@@ -62,7 +65,7 @@ def add_artist_to_db(artist_info):
 
 def add_album_to_db(track_info):
 
-    album_spotify_id = track_info['album_id']
+    album_spotify_id = track_info['spotify_album_id']
 
     try:
         album_object = Album.query.filter_by(album_spotify_id=album_spotify_id).one()
