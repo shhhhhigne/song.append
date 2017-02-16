@@ -218,12 +218,14 @@ def create_playlist_form():
 def add_song_to_playlist(song_id, playlist_id):
 
     try:
-        song_in_playlist = PlaylistSong.query.filter_by(song_id=song_object.song_id).one()
+        song_in_playlist = PlaylistSong.query.filter_by(song_id=song_id).one()
 
         # Later I will want to change this so that when you add a song already in the playlist
         # it will check if youve already voted on it and if you have then you cant, otherwise
         # add one to the vote 
         flash("This song is already in the playlist")
+
+        return 'Song already in playlist'
 
     except sqlalchemy.orm.exc.NoResultFound:
 
@@ -232,9 +234,11 @@ def add_song_to_playlist(song_id, playlist_id):
 
         flash(song_id + 'in playlist' + playlist_id)
 
+    song_object = Song.query.filter_by(song_id=song_id).one()
+    playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
 
-    #this needs to be fixed, it needs to stay on the current page
-    return redirect('/')
+    return jsonify({'song_name': song_object.song_name,
+            'playlist_name': playlist_object.playlist_name})
 
 
 # @app.route('/playlist/<playlist_id>')

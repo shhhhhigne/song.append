@@ -17,7 +17,7 @@ function populateDropDownOwned(playlist_info) {
             newItemLink.text(playlist_name);
             newItem.addClass('dropdown-playlist');
 
-            $('.track-playlist-dropdown').append(newItem)
+            $(this).append(newItem)
         }
     });
 }
@@ -41,26 +41,20 @@ function populateDropDownBelong(playlist_info) {
         for (playlist_id in playlist_info) {
             var playlist_name = playlist_info[playlist_id];
         
-            // console.log(`playlist name = ${playlist_name}`)
-
-            
-
-            // console.log('hellooooooooo')
-            // console.log('song_id: ' + song_id);
-
             newItem = $('<li>');
-            newItemLink = $('<a>', {href: '/add-song-to-playlist/' + song_id + '/' + playlist_id,
-                                    value: playlist_id song_id,
+            newItemLink = $('<a>', {value: playlist_id,
                                     class: 'add-song-link'
             });
 
-            newItem.append(newItemLink);
+            $(newItemLink).on('click', function() { addSongToPlaylist(song_id, playlist_id);
+            });
 
+            newItem.append(newItemLink);
             newItemLink.text(playlist_name);
             newItem.addClass('dropdown-playlist');
-           
-            $('.track-playlist-dropdown').append(newItem);
-        }
+            $(this).append(newItem);
+    } 
+            
     });
     
 }
@@ -73,21 +67,90 @@ function getBelongingPlaylists() {
 getBelongingPlaylists();
 
 
+function songAddedToPlaylistSuccess(results){
+    alert(`${results['song_name']} added to ${results['playlist_name']}`)
+}
+
+function addSongToPlaylist(song_id, playlist_id) {
 
 
-// function addSongToPlaylist(evt) {
+    songIds = {'song_id': song_id,
+               'playlist_id': playlist_id
+    };
 
-//     evt.preventDefault()
-
-//     console.log($(this))
-//     link = 
-
-
-
-//     // adderIds = {'song_id': }
-
-// }
+    $.post('/add-song-to-playlist/' + song_id + '/' + playlist_id,
+           songIds,
+           songAddedToPlaylistSuccess
+    );
+}
 
 
-// $('.add-song-link').on('click', addSongToPlaylist)
+var audioPlayer = null;
+var playing_id = null;
+var playing = false; 
+
+var x
+
+// TODO: make click and hold play pop up menu and single click play preview
+function setAudioState() {
+    x = event
+    var evt = event;
+
+    console.log('hello')
+    if (audioPlayer == null) {
+        audioPlayer = new Audio();
+    }
+
+    var target = evt.currentTarget
+    var newSong = true;
+
+    if (playing_id != null) {
+        if (playing_id != target.id) {
+            $('#'+playing_id).removeClass('glyphicon-pause');
+            $('#'+playing_id).addClass('glyphicon-play-circle');
+        }
+        else {
+            newSong = false;
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+            }
+            else {
+                audioPlayer.pause()
+            }
+        }
+    }
+
+    playing_id = target.id
+
+    var play_id = playing_id.split("-")[0]
+    
+    if (newSong == true) {
+        var preview_url = $('#'+playing_id).data('tooltip');
+        audioPlayer.src = preview_url;
+        audioPlayer.play();
+    }
+
+    if (audioPlayer.paused) {
+        $('#'+play_id).addClass('glyphicon-play-circle');
+        $('#'+play_id).removeClass('glyphicon-pause');
+    }
+    else {
+        $('#'+play_id).removeClass('glyphicon-play-circle');
+        $('#'+play_id).addClass('glyphicon-pause');
+    }
+    
+    // var state = evt.target.is_playing;
+
+
+
+    // if (playing == false) {
+    //     if (playing_id == id) {
+    //         playing = true;
+
+    //     }
+    // }
+}
+
+$('.play-button').on('click', setAudioState);
+// $('')
 

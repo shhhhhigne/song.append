@@ -24,9 +24,9 @@
             <tr>
                 <td>
                     <span class="dropdown">
-                    <span class="glyphicon glyphicon-play-circle dropdown-toggle" id="playDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                    <span class="glyphicon glyphicon-play-circle dropdown-toggle playDropdown" id="{{ id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
                     <ul class="dropdown-menu" aria-labelledby="playDropdown">
-                        <li class='play-button'><a href="#">Play 30 sec Preview</a></li>
+                        <li id="{{ id }}-preview" class='play-button' data-tooltip="{{ item['preview'] }}"><a>Play 30 sec Preview</a></li>
                         <li><a href="#">Play Full Song on Spotify</a></li>
                     </ul> 
                     </span>
