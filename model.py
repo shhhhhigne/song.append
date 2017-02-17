@@ -138,6 +138,9 @@ class Song(db.Model):
     # Used to find the song in the spotify database
     spotify_url = db.Column(db.String(300), nullable=False, unique=True)
 
+    # Used to add tracks to playlist
+    # song_spotify_uri = db.Column(db.String(300), nullable=False, unique=True)
+
     album = db.relationship("Album", backref=db.backref("songs", order_by=song_id))
 
     def __repr__(self):

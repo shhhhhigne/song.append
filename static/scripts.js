@@ -19,7 +19,7 @@ function populateDropDownOwned(playlist_info) {
         // console.log(`playlist name = ${playlist_name}`)
 
          newItem = $('<li>');
-         newItemLink = $('<a>', { href: '/get-playlist/'+playlist_id,
+         newItemLink = $('<a>', { href: '/playlist/'+playlist_id,
                                   value: playlist_id
 
         });
@@ -52,7 +52,7 @@ function populateDropDownBelong(playlist_info) {
         // console.log(`playlist name = ${playlist_name}`)
 
          newItem = $('<li>');
-         newItemLink = $('<a>', { href: '/get-playlist/'+playlist_id,
+         newItemLink = $('<a>', { href: '/playlist/'+playlist_id,
                                   value: playlist_id
 
         });

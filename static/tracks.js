@@ -8,9 +8,14 @@ function populateDropDownOwned(playlist_info) {
             // console.log(`playlist name = ${playlist_name}`)
 
              newItem = $('<li>');
-             newItemLink = $('<a>', { href: '/add-song-to-playlist/'+song_id+'/'+playlist_id,
-                                      value: playlist_id
+             newItemLink = $('<a>', {value: playlist_id,
+                                    class: 'add-song-link'
+            });
 
+             $(newItemLink).data('song_id', song_id)
+
+            // alert(song_id);
+            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id);
             });
             newItem.append(newItemLink);
 
@@ -44,10 +49,15 @@ function populateDropDownBelong(playlist_info) {
             newItem = $('<li>');
             newItemLink = $('<a>', {value: playlist_id,
                                     class: 'add-song-link'
+
             });
 
-            $(newItemLink).on('click', function() { addSongToPlaylist(song_id, playlist_id);
+            $(newItemLink).data('song_id', song_id)
+
+            // alert(song_id);
+            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id);
             });
+
 
             newItem.append(newItemLink);
             newItemLink.text(playlist_name);
@@ -68,7 +78,20 @@ getBelongingPlaylists();
 
 
 function songAddedToPlaylistSuccess(results){
-    alert(`${results['song_name']} added to ${results['playlist_name']}`)
+    console.log(results);
+
+    if (results['already_in_playlist'] == false){
+        if (results['status'] == 'active') {
+            alert(`${results['song_name']} added to ${results['playlist_name']}`)
+        }
+        else {
+            alert(`${results['song_name']} requested for ${results['playlist_name']}`)
+        }
+    }
+    else {
+        alert(`${results['song_name']} already in ${results['playlist_name']}`)
+
+    }
 }
 
 function addSongToPlaylist(song_id, playlist_id) {

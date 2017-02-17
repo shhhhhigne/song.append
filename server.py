@@ -15,11 +15,14 @@ from model import User, Group, UserGroup, Playlist, PlaylistSong, Vote
 from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists, search
+from spotipy_functions import add_song_to_spotify_playlist
 
 from helper_functions import (get_user_groups,
                               get_user_owned_playlists, 
                               get_user_belonging_playlists,
-                              get_playlist_songs)
+                              get_playlist_songs,
+                              get_song_data,
+                              get_song_artists)
 
 
 app = Flask(__name__)
@@ -217,49 +220,104 @@ def create_playlist_form():
 @app.route('/add-song-to-playlist/<song_id>/<playlist_id>', methods=['POST'])
 def add_song_to_playlist(song_id, playlist_id):
 
+    song_object = Song.query.filter_by(song_id=song_id).one()
+    playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
+
+    song_name = song_object.song_name
+    playlist_name = playlist_object.playlist_name
+
+    current_user_id = session['user_id']
+    playlist_owner_id = playlist_object.user_id
+
+
     try:
-        song_in_playlist = PlaylistSong.query.filter_by(song_id=song_id).one()
+        song_in_playlist = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
+
+        status = song_in_playlist.status
 
         # Later I will want to change this so that when you add a song already in the playlist
         # it will check if youve already voted on it and if you have then you cant, otherwise
         # add one to the vote 
-        flash("This song is already in the playlist")
-
-        return 'Song already in playlist'
+        flash(song_name + 'is already in playlist' + playlist_name)
+        
+        return jsonify({'song_name': song_name,
+                        'playlist_name': playlist_name,
+                        'already_in_playlist': True})
 
     except sqlalchemy.orm.exc.NoResultFound:
 
+        song_spotify_id = [song_object.song_spotify_id]
+        playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
+
+        if current_user_id == playlist_owner_id:
+            status = 'active'
+
+            count = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status='active').count()
+            index = count + 1
+
+            playlist_spotify_id = playlist_object.playlist_spotify_id
+
+
+        else:
+            status = 'requested'
+
+            count = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).count()
+            index = count + 1
+
+            playlist_spotify_id = playlist_object.playlist_spotify_id_req
+
+
+
         playlist_song_object = PlaylistSong(song_id=song_id,
-                                            playlist_id=playlist_id)
+                                            playlist_id=playlist_id,
+                                            status = status,
+                                            index=index)
 
-        flash(song_id + 'in playlist' + playlist_id)
+        db.session.add(playlist_song_object)
+        db.session.commit()
 
-    song_object = Song.query.filter_by(song_id=song_id).one()
-    playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
+        add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id)
+        add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_full)
 
-    return jsonify({'song_name': song_object.song_name,
-            'playlist_name': playlist_object.playlist_name})
+        
+        flash(song_name + 'added to  playlist' + playlist_name)
 
 
-# @app.route('/playlist/<playlist_id>')
-# def show_playlist(playlist_id):
+        return jsonify({'song_name': song_name,
+                        'playlist_name': playlist_name,
+                        'already_in_playlist': False,
+                        'status': status})
 
-#     playlist = Playlist.query.filter_by(playlist_id).one()
 
-#     songs = get_playlist_songs(playlist_id)
+@app.route('/playlist/<playlist_id>')
+def show_playlist(playlist_id):
 
-#     user_id = session['user_id']
+    playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
 
-#     if playlist.user_id == user_id:
-#         #theyre not actually creating this, I might want to refactor this somehow
-#         page = 'create_playlist.html'
+    status = 'active'
+    playlist_songs = get_playlist_songs(playlist_id, status)
 
-#     else:
-#         page = 'playlist.html'
+    songs = []
 
-#     return render_template(page,
-#                            playlist=playlist,
-#                            songs=songs)
+    for song in playlist_songs:
+        song_data = get_song_data(song.song_id)
+        songs.append(song_data)
+
+    user_id = session['user_id']
+
+    if playlist.user_id == user_id:
+        #theyre not actually creating this, I might want to refactor this somehow
+        page = 'create_playlist.html'
+
+    else:
+        page = 'playlist.html'
+
+    user_object = User.query.filter_by(user_id=playlist.user_id).one()
+
+    return render_template(page,
+                           playlist=playlist,
+                           songs=songs,
+                           user=user_object)
 
 
 
@@ -318,18 +376,18 @@ def show_user_belonging_playlists():
 
 
 
-@app.route('/get-playlist/<playlist_id>')
-def get_playlist(playlist_id):
+# @app.route('/get-playlist/<playlist_id>')
+# def get_playlist(playlist_id):
 
-    playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
-    playlist_name = playlist_object.playlist_name
+#     playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
+#     playlist_name = playlist_object.playlist_name
 
-    songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
+#     songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
     
 
-    return render_template('playlist.html',
-                           playlist_object=playlist_object
-                           )
+#     return render_template('playlist.html',
+#                            playlist_object=playlist_object
+#                            )
 
 @app.route('/create-group')
 def create_group_form():
@@ -460,6 +518,7 @@ if __name__ == "__main__":
     # point that we invoke the DebugToolbarExtension
     app.debug = True
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+    app.config['SQLALCHEMY_ECHO'] = False
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)

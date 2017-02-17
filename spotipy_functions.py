@@ -74,7 +74,18 @@ def show_all_playlists():
     return playlists
 
 def get_playlist(playlist_id):
+
+    # token = get_token()
+
+
     pass
+
+def add_song_to_spotify_playlist(song_id, playlist_id):
+
+    token = get_token()
+
+    sp = spotipy.Spotify(auth=token)
+    sp.user_playlist_add_tracks(username, playlist_id, song_id)
 
 
 def get_playlist_info(playlist_id):
@@ -175,7 +186,7 @@ def search(user_input):
 
     all_results['stuff'] = 'stuff'
 
-    print all_results
+    # print all_results
 
     #TODO: be able to search things other than songs 
 

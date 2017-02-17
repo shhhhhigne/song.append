@@ -54,12 +54,40 @@ def get_user_belonging_playlists(user_id):
     return playlists
 
 
-def get_playlist_songs(playlist_id):
+def get_playlist_songs(playlist_id, status):
 
-    playlist_songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
+    playlist_songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).order_by('index').all()
+
+    print 'songs', playlist_songs
 
     return playlist_songs
 
+
+def get_song_data(song_id):
+
+    song = Song.query.filter_by(song_id=song_id).one()
+
+    song_artists = SongArtist.query.filter_by(song_id=song_id).all()
+
+    artists = []
+    for artist in song_artist:
+        artists.append(artist_id=song_artist.artist_id)
+
+    song_data = {'song': song,
+                 'artists': artists}
+
+    return song
+
+
+# def get_song_artists(song_id):
+
+#     song_artists = SongArtist.query.filter_by(song_id=song_id)
+
+#     artists = []
+#     for artist in song_artist:
+#         artists.append(artist_id=song_artist.artist_id)
+
+#     return artists
 
 
 
