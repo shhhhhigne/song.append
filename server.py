@@ -22,7 +22,7 @@ from helper_functions import (get_user_groups,
                               get_user_belonging_playlists,
                               get_playlist_songs,
                               get_song_data,
-                              get_song_artists)
+                              get_song_value)
 
 
 app = Flask(__name__)
@@ -294,30 +294,48 @@ def show_playlist(playlist_id):
 
     playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
 
-    status = 'active'
-    playlist_songs = get_playlist_songs(playlist_id, status)
+    playlist_songs = get_playlist_songs(playlist_id, 'active')
+    req_playlist_songs = get_playlist_songs(playlist_id, 'requested')
+
 
     songs = []
 
     for song in playlist_songs:
         song_data = get_song_data(song.song_id)
+        song_data['song-value'] = get_song_value(song.song_id)
+        song_data['ps_id'] = song.ps_id
         songs.append(song_data)
+
+    req_songs = []
+    for song in req_playlist_songs:
+        song_data = get_song_data(song.song_id)
+        song_data['ps_id'] = song.ps_id
+        song_data['song-value'] = get_song_value(song.song_id)
+        # print '**********', get_song_value(song.ps_id)
+        # song_data['song_value'] = get_song_value(song.ps_id)
+        req_songs.append(song_data)
 
     user_id = session['user_id']
 
+    user_object = User.query.filter_by(user_id=playlist.user_id).one()
+    groups = Group.query.all()
+
+
+
     if playlist.user_id == user_id:
         #theyre not actually creating this, I might want to refactor this somehow
-        page = 'create_playlist.html'
+        page = 'owned_playlist.html'
 
     else:
         page = 'playlist.html'
 
-    user_object = User.query.filter_by(user_id=playlist.user_id).one()
 
     return render_template(page,
                            playlist=playlist,
                            songs=songs,
-                           user=user_object)
+                           req_songs=req_songs,
+                           user=user_object,
+                           groups=groups)
 
 
 
@@ -495,7 +513,84 @@ def show_search_results():
 
 
 
+@app.route('/register-user-vote', methods=['POST'])
+def register_user_vote():
 
+    user_id = session['user_id']
+    ps_id = request.form.get('ps_id')
+    vote_value = int(request.form.get('vote_value'))
+
+    thumb_id = request.form.get('thumb_id')
+
+    try:
+        user_vote_object = Vote.query.filter_by(ps_id=ps_id).filter_by(user_id=user_id).one()
+
+        if user_vote_object.value == vote_value:
+            #This needs to change so that they cant click on the same thumb again
+            # or somehow be refactored
+            return jsonify({'alert': 'you already gave this a' + str(vote_value),
+                            'vote_value': vote_value,
+                            'ps_id': ps_id,
+                            'vote_status': 'same'})
+
+        else:
+            user_vote_object.value = vote_value
+
+            db.session.commit()
+
+            return jsonify({'alert': 'your vote is now changed to ' + str(vote_value),
+                            'vote_value': vote_value,
+                            'ps_id': ps_id,
+                            'vote_status': 'changed'})
+
+    except sqlalchemy.orm.exc.NoResultFound:
+
+        user_vote_object = Vote(value=vote_value,
+                                ps_id=ps_id,
+                                user_id=user_id)
+
+        db.session.add(user_vote_object)
+        db.session.commit()
+
+
+        return jsonify({'alert': 'You gave a vote of ' + str(vote_value),
+                        'vote_value': vote_value,
+                        'ps_id': ps_id,
+                        'vote_status': 'new'})
+
+
+@app.route('/get-current-user-vote', methods=['POST'])
+def get_current_user_votes():
+
+    user_id = session['user_id']
+
+    print '******', 
+    ps_ids = request.form.getlist('ps_ids[]')
+
+    votes = []
+
+    for ps_id in ps_ids:
+        try:
+            user_vote = Vote.query.filter_by(user_id=user_id).filter_by(ps_id=ps_id).one()
+
+            vote_info = {'ps_id': ps_id,
+                         'user_id': user_id,
+                         'vote_value': user_vote.value}
+
+            votes.append(vote_info)
+
+        except sqlalchemy.orm.exc.NoResultFound:
+            continue
+
+    return jsonify(votes)
+
+
+
+
+
+
+
+ 
 
 
 

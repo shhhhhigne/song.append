@@ -5,10 +5,12 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
+# from sqlalchemy import func
 
 import re
 
-from model import User, Group, UserGroup, Playlist, Song, PlaylistSong, Vote
+from model import Album, Song, Artist, SongArtist
+from model import User, Group, UserGroup, Playlist, PlaylistSong, Vote
 from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists
@@ -58,7 +60,7 @@ def get_playlist_songs(playlist_id, status):
 
     playlist_songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).order_by('index').all()
 
-    print 'songs', playlist_songs
+    # print 'songs', playlist_songs
 
     return playlist_songs
 
@@ -67,27 +69,53 @@ def get_song_data(song_id):
 
     song = Song.query.filter_by(song_id=song_id).one()
 
+    album = Album.query.filter_by(album_id=song.album_id).one()
+
     song_artists = SongArtist.query.filter_by(song_id=song_id).all()
+    # print '*********', song_artists
 
     artists = []
-    for artist in song_artist:
-        artists.append(artist_id=song_artist.artist_id)
+    for artist in song_artists:
+        artist_info = Artist.query.filter_by(artist_id=artist.artist_id).one()
+        artists.append(artist_info)
 
     song_data = {'song': song,
-                 'artists': artists}
+                 'artists': artists,
+                 'album': album}
 
-    return song
+    return song_data
 
 
-# def get_song_artists(song_id):
+def get_song_value(ps_id):
 
-#     song_artists = SongArtist.query.filter_by(song_id=song_id)
+    # q = Vote.query.filter_by(ps_id=ps_id).all()
 
-#     artists = []
-#     for artist in song_artist:
-#         artists.append(artist_id=song_artist.artist_id)
+    # value = q.query(func.sum(Vote.value))
 
-#     return artists
+    # query = db.session.()
+
+    values = Vote.query.filter_by(ps_id=ps_id).all()
+    # query = db.session.query(Vote.value).filter_by(ps_id=1).all()
+
+    total = 0
+    for instance in values:
+        print '&&&&&&&&&&&', instance.value
+        total = total + int(instance.value)
+
+    print '############', total
+
+
+
+    # print "*" * 40
+    # print query
+
+
+    # q.(db.func.sum(value))
+    # q.having(db.func.sum(Vote.ps_id))
+
+    # value = q.filter_by(ps_id=ps_id)
+
+    return total
 
 
 

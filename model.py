@@ -49,15 +49,15 @@ class Group(db.Model):
 class UserGroup(db.Model):
     """User/Group relationship in curated playlist app."""
 
-    __tablename__ = "user-group"
+    __tablename__ = "user_group"
 
     ug_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey("groups.group_id"), nullable=False)
     in_group = db.Column(db.Boolean, default=False, nullable=False)
 
-    user = db.relationship("User", backref=db.backref("user-group", order_by=ug_id))
-    group = db.relationship("Group", backref=db.backref("user-group", order_by=ug_id))
+    user = db.relationship("User", backref=db.backref("user_group", order_by=ug_id))
+    group = db.relationship("Group", backref=db.backref("user_group", order_by=ug_id))
 
     def __repr__(self):
         """Provide helpful representation when printed"""
@@ -169,15 +169,15 @@ class Artist(db.Model):
 class SongArtist(db.Model):
     """Song/Artist relationship in curated playlist app."""
 
-    __tablename__ = "song-artist"
+    __tablename__ = "song_artist"
 
     sartist_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
     song_id = db.Column(db.Integer, db.ForeignKey("songs.song_id"), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey("artists.artist_id"), nullable=False)
 
-    song = db.relationship("Song", backref=db.backref("song-artist", order_by=sartist_id))
-    artist = db.relationship("Artist", backref=db.backref("song-artist", order_by=sartist_id))
+    song = db.relationship("Song", backref=db.backref("song_artist", order_by=sartist_id))
+    artist = db.relationship("Artist", backref=db.backref("song_artist", order_by=sartist_id))
 
     def __repr__(self):
         """Provide helpful representation when printed"""
@@ -189,7 +189,7 @@ class SongArtist(db.Model):
 class PlaylistSong(db.Model):
     """Playlist/Song relationship in curated playlist app."""
 
-    __tablename__ = "playlist-song"
+    __tablename__ = "playlist_song"
 
     ps_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
@@ -202,8 +202,8 @@ class PlaylistSong(db.Model):
     # the index in the playlist
     index = db.Column(db.Integer, nullable=False) 
 
-    playlist = db.relationship("Playlist", backref=db.backref("playlist-song", order_by=ps_id))
-    song = db.relationship("Song", backref=db.backref("playlist-song", order_by=ps_id))
+    playlist = db.relationship("Playlist", backref=db.backref("playlist_song", order_by=ps_id))
+    song = db.relationship("Song", backref=db.backref("playlist_song", order_by=ps_id))
 
     def __repr__(self):
         """Provide helpful representation when printed"""
@@ -220,7 +220,7 @@ class Vote(db.Model):
     vote_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     value = db.Column(db.Integer, nullable=False)
 
-    ps_id = db.Column(db.Integer, db.ForeignKey("playlist-song.ps_id"), nullable=False)
+    ps_id = db.Column(db.Integer, db.ForeignKey("playlist_song.ps_id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
 
     playlist_song = db.relationship("PlaylistSong", backref=db.backref("votes", order_by=vote_id))

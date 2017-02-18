@@ -1,14 +1,75 @@
 {% extends 'base.html' %}
-{% block title %}Registration{% endblock %}
+{% block title %}Create Playlist{% endblock %}
 {% block content %}
 
-<h1 class='current-page' value='owned-playlist'>Create Group</h1>
+<h1 class='current-page' value='create-playlist'>Create Playlist</h1>
 
-<form method='POST' action='/create-group' id='group-name-form'>
-    Group Name: <input type='text' name='group-name' id='group-name'>
+<form method='POST' action='/create-playlist' id='playlist-name-form'>
+    Playlist Name: <input type='text' name='playlist-name' id='playlist-name' value='{{ playlist.playlist_name }}'>
+    <br>
+    Group: <select name='group' class='dropdown'>
+        {% for group in groups %}
+            {% if playlist.group_id == group.group_id %}
+                <option id='{{ group.group_id }}' value='{{ group.group_id }}' selected='selected'>{{ group.group_name }}</option>
+            {% else %}
+                <option id='{{ group.group_id }}' value='{{ group.group_id }}''>{{ group.group_name }}</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+    <br>
+    Rules: <br>
+        Number of Votes to Add Song: <input type='number' name='num-to-add' id='num-to-add' value='{{ playlist.num_votes_add }}'>
+        <br>
+        Number of Votes to Delete Song: <input type='number' name='num-to-del' id='num-to-del' value='{{ playlist.num_votes_del }}'>
+        <br>
+
     <input type='submit' name='Submit'>
 </form>
+<br>
+<h3>Tracks</h3>
+<table class="table table-hover">
+<thead>
+<tr>
+    <th> </th>
+    <th>Song</th>
+    <th>Artist</th>
+    <th>Album</th>
+    <th> </th>
+</tr>
+</thead>
+<tbody>
+    {% for song in songs %}
+        <tr>
+            <td>
+                <span class="dropdown">
+                <span class="glyphicon glyphicon-play-circle dropdown-toggle playDropdown" id="{{ song['song'].song_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <ul class="dropdown-menu" aria-labelledby="playDropdown">
+                    <li id="{{ song['song'].song_id }}-preview" class='play-button' data-tooltip="{{ song['song'].preview_url }}"><a>Play 30 sec Preview</a></li>
+                    <li><a href="#">Play Full Song on Spotify</a></li>
+                </ul> 
+                </span>
+            </td>
+            <td><a href="track/{{ song['song'].song_id }}">{{ song['song'].song_name }} </a></td>
+            <td>
+                <a href='artist/{{ song["artists"][0].artist_id }}'>{{ song["artists"][0].artist_name }}</a>
+                {% for artist in song['artists'][1:] %}
+                    , <a href='artist/{{ artist.artist_id }}'>{{ artist.artist_name }}</a>
+                {% endfor %}
+            </td>
+            <td><a href='track/{{ song["album"].album_id }}'>{{ song["album"].album_name }}</a></td>
+            <td>
+                <a id='{{ song["ps_id"] }}*1' class='user-vote upvote' data-song_id='{{ song["ps_id"] }}'><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>
+                <a id='{{ song["ps_id"] }}*-1' class='user-vote downvote' data-song_id='{{ song["ps_id"] }}'><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+            </td>
+        </tr>
 
+
+    {% endfor %}
+
+
+</tbody>
+
+<script src='/static/vote.js'></script>
 
 
 

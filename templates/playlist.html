@@ -5,7 +5,7 @@
 
 <h5>Playlist</h5>
 <h2 class='current-page' value='playlist'>{{ playlist.playlist_name }}</h2>
-<h5>Created by: {{ user.username }} </h5>
+<h5>Created by: {{ user.username }} -- {{ user.fname|title }} {{ user.lname|title }}</h5>
 
 
 <h3>Tracks</h3>
@@ -17,6 +17,7 @@
     <th>Artist</th>
     <th>Album</th>
     <th> </th>
+    <th> </th>
 </tr>
 </thead>
 <tbody>
@@ -25,31 +26,26 @@
         <tr>
             <td>
                 <span class="dropdown">
-                <span class="glyphicon glyphicon-play-circle dropdown-toggle playDropdown" id="{{ song.song_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <span class="glyphicon glyphicon-play-circle dropdown-toggle playDropdown" id="{{ song['song'].song_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
                 <ul class="dropdown-menu" aria-labelledby="playDropdown">
-                    <li id="{{ song.song_id }}-preview" class='play-button' data-tooltip="{{ song.preview_url }}"><a>Play 30 sec Preview</a></li>
+                    <li id="{{ song['song'].song_id }}-preview" class='play-button' data-tooltip="{{ song['song'].preview_url }}"><a>Play 30 sec Preview</a></li>
                     <li><a href="#">Play Full Song on Spotify</a></li>
                 </ul> 
                 </span>
             </td>
-            <td><a href='track/{{ song.song_id }}'>{{ song.song_name }} </a></td>
+            <td><a href="track/{{ song['song'].song_id }}">{{ song['song'].song_name }} </a></td>
             <td>
-                <a href='artist/{{ item["artists"][0]["artist_id"] }}'>{{ item["artists"][0]['artist_name'] }}</a>
-                {% for artist in item['artists'][1:] %}
-                    , <a href='artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
+                <a href='artist/{{ song["artists"][0].artist_id }}'>{{ song["artists"][0].artist_name }}</a>
+                {% for artist in song['artists'][1:] %}
+                    , <a href='artist/{{ artist.artist_id }}'>{{ artist.artist_name }}</a>
                 {% endfor %}
             </td>
-            <td><a href='track/{{ item["album_id"] }}'>{{ item['album_name'] }}</a></td>
-            <td>
-                <span class="dropdown">
-                <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="playlist-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
-                <ul class="dropdown-menu dropdown-menu-right track-playlist-dropdown" aria-labelledby="playlist-dropdown" data-tooltip="{{ id }}">
-                    <li><a href="/create-playlist">+ New Playlist</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li class='dropdown-header owned-playlists'>Owned Playlists</li>
-                </ul>
-                </span>
+            <td><a href='track/{{ song["album"].album_id }}'>{{ song["album"].album_name }}</a></td>
+            <td class='user-vote-col' id='{{ song["ps_id"] }}'>
+                <a id='{{ song["ps_id"] }}_1' class='user-vote upvote' data-song_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_1_thumb' class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>
+                <a id='{{ song["ps_id"] }}_-1' class='user-vote downvote' data-song_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_-1_thumb' class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
             </td>
+            <td>{{ song['song-value'] }}</td>
         </tr>
 
 
@@ -57,9 +53,59 @@
 
 
 </tbody>
-    
+</table>
+
+<h3>Requested Tracks</h3>
+<table class="table table-hover">
+<thead>
+<tr>
+    <th> </th>
+    <th>Song</th>
+    <th>Artist</th>
+    <th>Album</th>
+    <th> </th>
+    <th> </th>
+</tr>
+</thead>
+<tbody>
+
+    {% for song in req_songs %}
+        <tr>
+            <td>
+                <span class="dropdown">
+                <span class="glyphicon glyphicon-play-circle dropdown-toggle playDropdown" id="{{ song['song'].song_id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <ul class="dropdown-menu" aria-labelledby="playDropdown">
+                    <li id="{{ song['song'].song_id }}-preview" class='play-button' data-tooltip="{{ song['song'].preview_url }}"><a>Play 30 sec Preview</a></li>
+                    <li><a href="#">Play Full Song on Spotify</a></li>
+                </ul> 
+                </span>
+            </td>
+            <td><a href="track/{{ song['song'].song_id }}">{{ song['song'].song_name }} </a></td>
+            <td>
+                <a href='artist/{{ song["artists"][0].artist_id }}'>{{ song["artists"][0].artist_name }}</a>
+                {% for artist in song['artists'][1:] %}
+                    , <a href='artist/{{ artist.artist_id }}'>{{ artist.artist_name }}</a>
+                {% endfor %}
+            </td>
+            <td><a href='track/{{ song["album"].album_id }}'>{{ song["album"].album_name }}</a></td>
+            <td class='user-vote-col' id='{{ song["ps_id"] }}'>
+                <a id='{{ song["ps_id"] }}_1' class='user-vote upvote' data-song_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_1_thumb' class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>
+                <a id='{{ song["ps_id"] }}_-1' class='user-vote downvote' data-song_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_-1_thumb' class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+            </td>
+            <td>{{ song['song-value'] }}</td>
+
+        </tr>
 
 
+    {% endfor %}
 
+
+</tbody>
+</table>
+
+<script src='/static/vote.js'></script>
 
 {% endblock %}
+
+
+{% block javascript %}tracks{% endblock %}

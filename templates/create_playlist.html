@@ -5,18 +5,11 @@
 <h1 class='current-page' value='create-playlist'>Create Playlist</h1>
 
 <form method='POST' action='/create-playlist' id='playlist-name-form'>
-    Playlist Name: <input type='text' name='playlist-name' id='playlist-name'
-    {% if playlist_exists %} value='playlist.name' {% endif %}>
+    Playlist Name: <input type='text' name='playlist-name' id='playlist-name'>
     <br>
     Group: <select name='group' class='dropdown'>
         {% for group in groups %}
-            {% if playlist_exists %}
-                {% if playlist.group_id == group.group_id %}
-                <option id='{{ group.group_id }}' value='{{ group.group_id }}' selected='selected'>{{ group.group_name }}</option>
-                {% endif %}
-            {% else %}
-                <option id='{{ group.group_id }}' value='{{ group.group_id }}''>{{ group.group_name }}</option>
-            {% endif %}
+            <option id='{{ group.group_id }}' value='{{ group.group_id }}''>{{ group.group_name }}</option>
         {% endfor %}
         </select>
     <br>

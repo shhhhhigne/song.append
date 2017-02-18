@@ -35,9 +35,14 @@ def add_song_to_db(track_info):
 
         db.session.commit()
 
+        # print '#######', track_info['artists']
+
         for artist in track_info['artists']:
             song_artist_object = SongArtist(song_id=song_object.song_id,
                                             artist_id=artist['artist_id'])
+
+            db.session.add(song_artist_object)
+            db.session.commit()
 
     return {'song_id': song_object.song_id,
             'album_id': song_object.album_id}
