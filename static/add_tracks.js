@@ -80,27 +80,37 @@ getBelongingPlaylists();
 
 
 function songAddedToPlaylistSuccess(results){
-    var alert = results['alert']
+    // var alert = results['alert']
     var song_name = results['song_name']
     var playlist_name = results['playlist_name']
 
     var vote_status = results['vote_status']
+    var user_alert = results['user_alert']
+    var add_alert = results['add_alert']
 
-    if (results['already_in_playlist'] == false){
-        if (results['status'] == 'active') {
-            alert(`${results['song_name']} added to ${results['playlist_name']}`);
-        }
-        else {
-            alert(`${results['song_name']} requested for ${results['playlist_name']}`);
-        }
-    }
-    else {
-        if (results['vote_status'] != 'same') {
-            alert(alert)
-        }
-        // alert(`${results['song_name']} already in ${results['playlist_name']}`)
+    console.log(results)
 
-    }
+    alert(`${song_name} ${add_alert} ${playlist_name} \n ${user_alert}`)
+    
+
+
+
+    // if (results['already_in_playlist'] == false){
+    //     if (results['status'] == 'active') {
+    //         alert(`${results['song_name']} added to ${results['playlist_name']}`);
+    //     }
+    //     else {
+    //         alert(`${results['song_name']} requested for ${results['playlist_name']}`);
+    //     }
+    // }
+    // else {
+    //     if (vote_status != 'same') {
+    //         alert(alert)
+    //     }
+    //     else if (vote_status)
+    //     // alert(`${results['song_name']} already in ${results['playlist_name']}`)
+
+    // }
 }
 
 function addSongToPlaylist(song_id, playlist_id) {

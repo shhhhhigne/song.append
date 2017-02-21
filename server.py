@@ -234,7 +234,6 @@ def add_song_to_playlist(song_id, playlist_id):
 
     try:
         playlist_song_object = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
-        ps_id = playlist_song_object.ps_id
 
         status = playlist_song_object.status
 
@@ -250,7 +249,7 @@ def add_song_to_playlist(song_id, playlist_id):
 
         already_in_playlist = True
         
-        add_alert = ''
+        add_alert = 'already in'
         # return jsonify({'song_name': song_name,
         #                 'playlist_name': playlist_name,
         #                 'already_in_playlist': True,
@@ -293,7 +292,7 @@ def add_song_to_playlist(song_id, playlist_id):
         add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_full)
 
         
-        flash(song_name + 'added to  playlist' + playlist_name)
+        # flash(song_name + 'added to  playlist' + playlist_name)
 
         already_in_playlist = False
 
@@ -303,15 +302,18 @@ def add_song_to_playlist(song_id, playlist_id):
         #                 'status': status})
 
 
+    ps_id = playlist_song_object.ps_id
+
     user_add_try_info = register_user_vote(current_user_id, ps_id, 1)
 
+    # I could put together this alert here and not in my javascript if I wanted
     user_add_try_info['song_name'] = song_name
     user_add_try_info['playlist_name'] = playlist_name
-    user_add_try_info['already_in_playlist'] = already_in_playlist
-    user_add_try_info['status'] = status
+    # user_add_try_info['already_in_playlist'] = already_in_playlist
+    # user_add_try_info['status'] = status
     user_add_try_info['add_alert'] = add_alert
 
-    alert = user_add_try_info['alert']
+    alert = user_add_try_info['user_alert']
 
     # user_add_try_info['alert'] = alert + 
     

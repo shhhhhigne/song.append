@@ -103,10 +103,10 @@ def get_song_value(ps_id):
 
     total = 0
     for instance in values:
-        print '&&&&&&&&&&&', instance.value
+        # print '&&&&&&&&&&&', instance.value
         total = total + int(instance.value)
 
-    print '############', total
+    # print '############', total
 
 
 
@@ -162,7 +162,7 @@ def register_user_vote(user_id, ps_id, vote_value):
 
     song_status_changed = check_song_status(ps_id, vote_total, vote_value)
 
-    user_vote_info = {'alert': alert,
+    user_vote_info = {'user_alert': alert,
                       'vote_status': vote_status,
                       'vote_total': vote_total,
                       'song_status_changed': song_status_changed}

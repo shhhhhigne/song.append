@@ -24,7 +24,7 @@ function userVoted(results) {
     var alt_thumb_id = ps_id + '_' + alt_vote_value + '_thumb';
 
     var vote_status = results['vote_status'];
-    alert(results['alert']);
+    alert(results['user_alert']);
 
     var vote_total_id = ps_id + '_total';
 
