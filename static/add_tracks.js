@@ -52,10 +52,12 @@ function populateDropDownBelong(playlist_info) {
 
             });
 
+            $(newItemLink).data('playlist_id', playlist_id)
+
             $(newItemLink).data('song_id', song_id)
 
             // alert(song_id);
-            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id);
+            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), $(this).data('playlist_id'));
             });
 
 
@@ -78,18 +80,25 @@ getBelongingPlaylists();
 
 
 function songAddedToPlaylistSuccess(results){
-    console.log(results);
+    var alert = results['alert']
+    var song_name = results['song_name']
+    var playlist_name = results['playlist_name']
+
+    var vote_status = results['vote_status']
 
     if (results['already_in_playlist'] == false){
         if (results['status'] == 'active') {
-            alert(`${results['song_name']} added to ${results['playlist_name']}`)
+            alert(`${results['song_name']} added to ${results['playlist_name']}`);
         }
         else {
-            alert(`${results['song_name']} requested for ${results['playlist_name']}`)
+            alert(`${results['song_name']} requested for ${results['playlist_name']}`);
         }
     }
     else {
-        alert(`${results['song_name']} already in ${results['playlist_name']}`)
+        if (results['vote_status'] != 'same') {
+            alert(alert)
+        }
+        // alert(`${results['song_name']} already in ${results['playlist_name']}`)
 
     }
 }

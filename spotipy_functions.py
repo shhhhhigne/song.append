@@ -88,6 +88,14 @@ def add_song_to_spotify_playlist(song_id, playlist_id):
     sp.user_playlist_add_tracks(username, playlist_id, song_id)
 
 
+def remove_song_from_spotify_playlist(song_id, playlist_id):
+
+    token = get_token()
+
+    sp = spotipy.Spotify(auth=token)
+    sp.user_playlist_remove_specific_occurrences_of_tracks(username, playlist_id, list(song_id))
+
+
 def get_playlist_info(playlist_id):
 
     #TODO: get plylist info

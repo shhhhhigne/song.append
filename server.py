@@ -22,7 +22,9 @@ from helper_functions import (get_user_groups,
                               get_user_belonging_playlists,
                               get_playlist_songs,
                               get_song_data,
-                              get_song_value)
+                              get_song_value,
+                              check_song_status,
+                              register_user_vote)
 
 
 app = Flask(__name__)
@@ -231,18 +233,28 @@ def add_song_to_playlist(song_id, playlist_id):
 
 
     try:
-        song_in_playlist = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
+        playlist_song_object = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
+        ps_id = playlist_song_object.ps_id
 
-        status = song_in_playlist.status
+        status = playlist_song_object.status
+
+        # user_add_try_info['already_in_playlist'] = True
+
 
         # Later I will want to change this so that when you add a song already in the playlist
         # it will check if youve already voted on it and if you have then you cant, otherwise
         # add one to the vote 
-        flash(song_name + 'is already in playlist' + playlist_name)
+
+
+        # flash(song_name + 'is already in playlist' + playlist_name)
+
+        already_in_playlist = True
         
-        return jsonify({'song_name': song_name,
-                        'playlist_name': playlist_name,
-                        'already_in_playlist': True})
+        add_alert = ''
+        # return jsonify({'song_name': song_name,
+        #                 'playlist_name': playlist_name,
+        #                 'already_in_playlist': True,
+        #                 'status': status})
 
     except sqlalchemy.orm.exc.NoResultFound:
 
@@ -257,6 +269,7 @@ def add_song_to_playlist(song_id, playlist_id):
 
             playlist_spotify_id = playlist_object.playlist_spotify_id
 
+            add_alert = 'added to'
 
         else:
             status = 'requested'
@@ -266,7 +279,7 @@ def add_song_to_playlist(song_id, playlist_id):
 
             playlist_spotify_id = playlist_object.playlist_spotify_id_req
 
-
+            add_alert = 'requested for'
 
         playlist_song_object = PlaylistSong(song_id=song_id,
                                             playlist_id=playlist_id,
@@ -282,11 +295,28 @@ def add_song_to_playlist(song_id, playlist_id):
         
         flash(song_name + 'added to  playlist' + playlist_name)
 
+        already_in_playlist = False
 
-        return jsonify({'song_name': song_name,
-                        'playlist_name': playlist_name,
-                        'already_in_playlist': False,
-                        'status': status})
+        # return jsonify({'song_name': song_name,
+        #                 'playlist_name': playlist_name,
+        #                 'already_in_playlist': False,
+        #                 'status': status})
+
+
+    user_add_try_info = register_user_vote(current_user_id, ps_id, 1)
+
+    user_add_try_info['song_name'] = song_name
+    user_add_try_info['playlist_name'] = playlist_name
+    user_add_try_info['already_in_playlist'] = already_in_playlist
+    user_add_try_info['status'] = status
+    user_add_try_info['add_alert'] = add_alert
+
+    alert = user_add_try_info['alert']
+
+    # user_add_try_info['alert'] = alert + 
+    
+
+    return jsonify(user_add_try_info)
 
 
 @app.route('/playlist/<playlist_id>')
@@ -302,7 +332,7 @@ def show_playlist(playlist_id):
 
     for song in playlist_songs:
         song_data = get_song_data(song.song_id)
-        song_data['song-value'] = get_song_value(song.song_id)
+        song_data['song-value'] = get_song_value(song.ps_id)
         song_data['ps_id'] = song.ps_id
         songs.append(song_data)
 
@@ -310,7 +340,7 @@ def show_playlist(playlist_id):
     for song in req_playlist_songs:
         song_data = get_song_data(song.song_id)
         song_data['ps_id'] = song.ps_id
-        song_data['song-value'] = get_song_value(song.song_id)
+        song_data['song-value'] = get_song_value(song.ps_id)
         # print '**********', get_song_value(song.ps_id)
         # song_data['song_value'] = get_song_value(song.ps_id)
         req_songs.append(song_data)
@@ -514,7 +544,7 @@ def show_search_results():
 
 
 @app.route('/register-user-vote', methods=['POST'])
-def register_user_vote():
+def register_user_vote_form():
 
     user_id = session['user_id']
     ps_id = request.form.get('ps_id')
@@ -522,41 +552,55 @@ def register_user_vote():
 
     thumb_id = request.form.get('thumb_id')
 
-    try:
-        user_vote_object = Vote.query.filter_by(ps_id=ps_id).filter_by(user_id=user_id).one()
-
-        if user_vote_object.value == vote_value:
-            #This needs to change so that they cant click on the same thumb again
-            # or somehow be refactored
-            return jsonify({'alert': 'you already gave this a' + str(vote_value),
-                            'vote_value': vote_value,
-                            'ps_id': ps_id,
-                            'vote_status': 'same'})
-
-        else:
-            user_vote_object.value = vote_value
-
-            db.session.commit()
-
-            return jsonify({'alert': 'your vote is now changed to ' + str(vote_value),
-                            'vote_value': vote_value,
-                            'ps_id': ps_id,
-                            'vote_status': 'changed'})
-
-    except sqlalchemy.orm.exc.NoResultFound:
-
-        user_vote_object = Vote(value=vote_value,
-                                ps_id=ps_id,
-                                user_id=user_id)
-
-        db.session.add(user_vote_object)
-        db.session.commit()
 
 
-        return jsonify({'alert': 'You gave a vote of ' + str(vote_value),
-                        'vote_value': vote_value,
-                        'ps_id': ps_id,
-                        'vote_status': 'new'})
+    # try:
+    #     user_vote_object = Vote.query.filter_by(ps_id=ps_id).filter_by(user_id=user_id).one()
+
+    #     if user_vote_object.value == vote_value:
+    #         #This needs to change so that they cant click on the same thumb again
+    #         # or somehow be refactored
+    #         # vote_total = get_song_value(ps_id)
+
+    #         alert = 'you already gave this a' + str(vote_value)
+    #         vote_status = 'same',
+
+    #     else:
+    #         user_vote_object.value = vote_value
+
+    #         db.session.commit()
+
+
+    #         alert = 'your vote is now changed to ' + str(vote_value)
+    #         vote_status = 'changed'
+
+
+    # except sqlalchemy.orm.exc.NoResultFound:
+
+    #     user_vote_object = Vote(value=vote_value,
+    #                             ps_id=ps_id,
+    #                             user_id=user_id)
+
+    #     db.session.add(user_vote_object)
+    #     db.session.commit()
+
+
+    #     alert = 'You gave a vote of ' + str(vote_value)
+    #     vote_status = 'new'
+
+    user_vote_info = register_user_vote(user_id, ps_id, vote_value)
+
+    # vote_total = get_song_value(ps_id)
+
+    # song_status_changed = check_song_status(ps_id, vote_total, vote_value)
+
+    user_vote_info['ps_id'] = ps_id
+    user_vote_info['vote_value'] = vote_value
+    # user_vote_info['vote_total'] = vote_total
+    # user_vote_info['song_status_changed'] = song_status_changed
+
+
+    return jsonify(user_vote_info)
 
 
 @app.route('/get-current-user-vote', methods=['POST'])

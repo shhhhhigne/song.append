@@ -13,15 +13,20 @@
 
 function userVoted(results) {
 
+    console.log(results)
+
     var vote_value = results['vote_value'];
+    var ps_id = results['ps_id'];
 
-    var thumb_id = results['ps_id'] + '_' + vote_value + '_thumb';
+    var thumb_id = ps_id + '_' + vote_value + '_thumb';
 
-    var alt_vote_value = -(vote_value)
-    var alt_thumb_id = results['ps_id'] + '_' + alt_vote_value + '_thumb';
+    var alt_vote_value = -(vote_value);
+    var alt_thumb_id = ps_id + '_' + alt_vote_value + '_thumb';
 
     var vote_status = results['vote_status'];
     alert(results['alert']);
+
+    var vote_total_id = ps_id + '_total';
 
     if (vote_status == 'same') {
         return;
@@ -31,6 +36,12 @@ function userVoted(results) {
 
     }
     $('#'+thumb_id).addClass('voted-on');
+    console.log(results['vote_total'])
+    $('#'+vote_total_id).text(results['vote_total']);
+
+    if (results['status_changed'] == true) {
+        location.reload(true);
+    }
 
 }
 
@@ -59,11 +70,6 @@ $('.user-vote').on('click', userVote);
 
 function showUserVotes(results) {
 
-    // console.log(results)
-
-    // for (result in results) {
-    //     console.log(result)
-    // }
 
     for (var i=0; i<results.length; i++) {
 
@@ -86,19 +92,6 @@ checkUserVotes()
 function checkUserVotes() {
 
 
-        // ps_ids = $('.user-vote-col').attr('id');
-
-        // ps_data = {'ps_ids': ps_ids
-        // };
-
-        // console.log(ps_ids)
-
-        // $.post('/get-current-user-vote',
-        //        ps_data,
-        //        showUserVotes
-        //        )
-
-
     var ps_ids = []
     $.each($('.user-vote-col'), function() {
 
@@ -115,45 +108,6 @@ function checkUserVotes() {
             ps_data,
             showUserVotes
     );
-
-    //     ps_data = {'ps_id': ps_id
-    //     };
-
-    //     $.post('/get-current-user-vote',
-    //            ps_data,
-    //            showUserVotes
-    //            )
-    // }
-
-    // {{ song["ps_id"] }}_1_thumb'
-
-
-
-    // $.each($('.track-playlist-dropdown'), function() {
-    //     song_id = $(this).data('tooltip')
-    //     for (playlist_id in playlist_info) {
-    //         var playlist_name = playlist_info[playlist_id];
-        
-    //         // console.log(`playlist name = ${playlist_name}`)
-
-    //          newItem = $('<li>');
-    //          newItemLink = $('<a>', {value: playlist_id,
-    //                                 class: 'add-song-link'
-    //         });
-
-    //          $(newItemLink).data('song_id', song_id)
-
-    //         // alert(song_id);
-    //         $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id);
-    //         });
-    //         newItem.append(newItemLink);
-
-    //         newItemLink.text(playlist_name);
-    //         newItem.addClass('dropdown-playlist');
-
-    //         $(this).append(newItem)
-    //     }
-    // });
 }
 
 
