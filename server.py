@@ -24,7 +24,9 @@ from helper_functions import (get_user_groups,
                               get_song_data,
                               get_song_value,
                               check_song_status,
-                              register_user_vote)
+                              register_user_vote,
+                              get_playlist_data,
+                              get_group_data)
 
 
 app = Flask(__name__)
@@ -324,39 +326,51 @@ def add_song_to_playlist(song_id, playlist_id):
 @app.route('/playlist/<playlist_id>')
 def show_playlist(playlist_id):
 
-    playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
+    # playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
 
-    playlist_songs = get_playlist_songs(playlist_id, 'active')
-    req_playlist_songs = get_playlist_songs(playlist_id, 'requested')
+    # playlist_songs = get_playlist_songs(playlist_id, 'active')
+    # req_playlist_songs = get_playlist_songs(playlist_id, 'requested')
 
 
-    songs = []
+    # songs = []
 
-    for song in playlist_songs:
-        song_data = get_song_data(song.song_id)
-        song_data['song-value'] = get_song_value(song.ps_id)
-        song_data['ps_id'] = song.ps_id
-        songs.append(song_data)
+    # for song in playlist_songs:
+    #     song_data = get_song_data(song.song_id)
+    #     song_data['song-value'] = get_song_value(song.ps_id)
+    #     song_data['ps_id'] = song.ps_id
+    #     songs.append(song_data)
 
-    req_songs = []
-    for song in req_playlist_songs:
-        song_data = get_song_data(song.song_id)
-        song_data['ps_id'] = song.ps_id
-        song_data['song-value'] = get_song_value(song.ps_id)
-        # print '**********', get_song_value(song.ps_id)
-        # song_data['song_value'] = get_song_value(song.ps_id)
-        req_songs.append(song_data)
+    # req_songs = []
+    # for song in req_playlist_songs:
+    #     song_data = get_song_data(song.song_id)
+    #     song_data['ps_id'] = song.ps_id
+    #     song_data['song-value'] = get_song_value(song.ps_id)
+    #     # print '**********', get_song_value(song.ps_id)
+    #     # song_data['song_value'] = get_song_value(song.ps_id)
+    #     req_songs.append(song_data)
+
+    playlist_data = get_playlist_data(playlist_id)
+
+    playlist = playlist_data['playlist']
+    songs = playlist_data['songs']
+    req_songs = playlist_data['req_songs']
 
     user_id = session['user_id']
 
+    group_id = playlist.group_id
+
     user_object = User.query.filter_by(user_id=playlist.user_id).one()
-    groups = Group.query.all()
 
+    groups = Group.query.filter_by(group_id=group_id).one()
 
+    group = Group.query.filter_by(group_id=group_id).one()
+
+    is_owner = False
 
     if playlist.user_id == user_id:
         #theyre not actually creating this, I might want to refactor this somehow
         page = 'owned_playlist.html'
+        is_owner = True
 
     else:
         page = 'playlist.html'
@@ -368,6 +382,10 @@ def show_playlist(playlist_id):
                            req_songs=req_songs,
                            user=user_object,
                            groups=groups)
+
+
+# @app.route('/playlist/<playlist_id>/edit')
+# def edit_playlist(playlist_id):
 
 
 
@@ -450,7 +468,10 @@ def create_group():
 
     name = request.form.get('group-name')
 
-    group_object = Group(group_name=name)
+    user_id = session['user_id']
+
+    group_object = Group(group_name=name,
+                         user_id=user_id)
 
     db.session.add(group_object)
 
@@ -459,6 +480,31 @@ def create_group():
     group_id = group_object.group_id
 
     return redirect('/add-to-group/' + str(group_id))
+
+
+@app.route('/edit-group/<group_id>')
+def edit_group(group_id):
+
+    group_data = get_group_data(group_id)
+
+
+    group_query = UserGroup.query.filter_by(group_id=group_id)
+    non_members = group_query.filter_by(in_group=False).all()
+
+    if not group_data['is_admin']:
+        return redirect('/')
+
+    return render_template('edit_group.html',
+                           group=group_data['group'],
+                           admin=group_data['admin'],
+                           members=group_data['members'],
+                           playlists=group_data['playlists'],
+                           non_members=non_members)
+
+
+
+
+
 
 @app.route('/get-user-belonging-groups')
 def show_user_belonging_groups():
@@ -498,6 +544,7 @@ def add_to_group_form(group_id):
                            group=group_object,
                            users=users)
 
+
 @app.route('/add-to-group/<group_id>', methods=['POST'])
 def update_users_in_group(group_id):
 
@@ -526,8 +573,6 @@ def update_users_in_group(group_id):
             db.session.add(ug_object)
 
         db.session.commit()
-
-
 
     return 'success'
 

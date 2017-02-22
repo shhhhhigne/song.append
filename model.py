@@ -35,10 +35,16 @@ class Group(db.Model):
     __tablename__ = 'groups'
 
     group_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    group_name = db.Column(db.String(64), nullable=False)
+    group_name = db.Column(db.String(64), nullable=False)\
+
+    # This is the group owner
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
 
     # Im not sure how I'd impliment this
     group_cover_art = db.Column(db.String(300), nullable=True)
+
+    user = db.relationship("User", backref=db.backref("groups", order_by=group_id))
+
     
     def __repr__(self):
         """Provide helpful representation when printed"""

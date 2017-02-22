@@ -50,9 +50,9 @@ def get_user_belonging_playlists(user_id):
     for group in user_groups:
         group_playlists = Playlist.query.filter_by(group_id=group.group_id).all()
         for group_playlist in group_playlists:
+            if group_playlist.user_id == session['user_id']:
+                continue
             playlists.append(group_playlist)
-
-
 
     return playlists
 
@@ -60,8 +60,6 @@ def get_user_belonging_playlists(user_id):
 def get_playlist_songs(playlist_id, status):
 
     playlist_songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).order_by('index').all()
-
-    # print 'songs', playlist_songs
 
     return playlist_songs
 
@@ -89,35 +87,12 @@ def get_song_data(song_id):
 
 def get_song_value(ps_id):
 
-    # q = Vote.query.filter_by(ps_id=ps_id).all()
-
-    # value = q.query(func.sum(Vote.value))
-
-    # query = db.session.()
-
-    print ps_id
-
+    # I might want to do this as a sql thing and not just loop through it
     values = Vote.query.filter_by(ps_id=ps_id).all()
-    # print Vote.query.filter_by(ps_id=10).all()
-    # query = db.session.query(Vote.value).filter_by(ps_id=1).all()
 
     total = 0
     for instance in values:
-        # print '&&&&&&&&&&&', instance.value
         total = total + int(instance.value)
-
-    # print '############', total
-
-
-
-    # print "*" * 40
-    # print query
-
-
-    # q.(db.func.sum(value))
-    # q.having(db.func.sum(Vote.ps_id))
-
-    # value = q.filter_by(ps_id=ps_id)
 
     return total
 
@@ -232,6 +207,94 @@ def check_song_status(ps_id, vote_total, vote_value):
     ####### I could also do all this adding and removing only when a user clicks
     #### the big play button and just run through my db and update the spotify playlists
     return status_changed
+
+
+def get_playlist_data(playlist_id):
+
+    playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
+
+    playlist_songs = get_playlist_songs(playlist_id, 'active')
+    req_playlist_songs = get_playlist_songs(playlist_id, 'requested')
+
+
+    songs = []
+
+    for song in playlist_songs:
+        song_data = get_song_data(song.song_id)
+        song_data['song-value'] = get_song_value(song.ps_id)
+        song_data['ps_id'] = song.ps_id
+        songs.append(song_data)
+
+    req_songs = []
+    for song in req_playlist_songs:
+        song_data = get_song_data(song.song_id)
+        song_data['ps_id'] = song.ps_id
+        song_data['song-value'] = get_song_value(song.ps_id)
+        # print '**********', get_song_value(song.ps_id)
+        # song_data['song_value'] = get_song_value(song.ps_id)
+        req_songs.append(song_data)
+
+    playlist_data = {'playlist': playlist,
+                     'songs': songs,
+                     'req_songs': req_songs}
+
+    return playlist_data
+
+
+def get_group_data(group_id):
+
+    group_object = Group.query.filter_by(group_id=group_id).one()
+
+    user_id = session['user_id']
+
+    admin_id = group_object.user_id
+
+    # owner_object = User.query.filter_by(user_id=owner_id).one()
+
+    admin = {'name': group_object.user.fname + ' ' + group_object.user.lname,
+             'username': group_object.user.username,
+             'admin_id': admin_id}
+
+    is_admin = False
+
+    if user_id == admin_id:
+        is_admin = True
+
+    group_name = group_object.group_name
+
+    group_query = UserGroup.query.filter_by(group_id=group_id)
+    member_query = group_query.filter_by(in_group=True)
+    members = member_query.filter(UserGroup.user_id!=admin_id).all()
+
+
+    # members = {}
+
+    # for group_member in group_members:
+    #     members[group_member.user_id] = {'name': group_member.user.fname + ' ' + group_member.user.lname,
+
+
+    playlist_objects = Playlist.query.filter_by(group_id=group_id).all()
+
+    playlists = {}
+
+    for playlist in playlist_objects:
+        playlist_name = playlist.playlist_name
+        user_id = playlist.user_id
+        playlists[user_id] = playlists.get(user_id, [])
+        playlists[user_id].append(playlist_name)
+
+    # playlist_owners = playlists.user_id
+
+    group_data = {'group':group_object,
+                  'admin': admin,
+                  'is_admin': is_admin,
+                  'members': members,
+                  'playlists': playlists}
+
+    return group_data
+
+
+
 
 
 

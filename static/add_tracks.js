@@ -92,25 +92,6 @@ function songAddedToPlaylistSuccess(results){
 
     alert(`${song_name} ${add_alert} ${playlist_name} \n ${user_alert}`)
     
-
-
-
-    // if (results['already_in_playlist'] == false){
-    //     if (results['status'] == 'active') {
-    //         alert(`${results['song_name']} added to ${results['playlist_name']}`);
-    //     }
-    //     else {
-    //         alert(`${results['song_name']} requested for ${results['playlist_name']}`);
-    //     }
-    // }
-    // else {
-    //     if (vote_status != 'same') {
-    //         alert(alert)
-    //     }
-    //     else if (vote_status)
-    //     // alert(`${results['song_name']} already in ${results['playlist_name']}`)
-
-    // }
 }
 
 function addSongToPlaylist(song_id, playlist_id) {
