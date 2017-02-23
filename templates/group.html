@@ -24,23 +24,6 @@
             <td>
                 <a href="user/{{ member.user_id }}">{{ member.user.fname }} {{ member.user.lname }}({{ member.user.username }})</a>
             </td>
-            <td>
-                <span class="dropdown">
-                <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="member-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
-                <ul class="dropdown-menu dropdown-menu-right track-playlist-dropdown" aria-labelledby="member-dropdown">
-                    <li>
-                        <a id='{{ member.user.user_id }}-remove' class='remove_member' data-user_id='{{ member.user.user_id }}' data-group_id='{{ group.group_id }}'>
-                            Remove from Group
-                        </a>
-                    </li>
-                    <li>
-                        <a id='{{ member.user.user_id }}-make_admin' class='admin_member'data-user_id='{{ member.user.user_id }}' data-group_id='{{ group.group_id }}'>
-                            Make Admin
-                        </a>
-                    </li>
-                </ul>
-                </span>
-            </td>
         </tr>
 
 
@@ -59,6 +42,9 @@
  --><span class='glyphicon glyphicon-plus-sign add_member' type="submit" data-group_id='{{ group.group_id }}'></span>
 <!-- </button> -->
 </form>
+
+
+<a class='remove_member me' data-user_id='{{ session["user_id"] }}' data-group_id='{{ group.group_id }}'>Remove myself from this group</a>
 
 
 <script type=text/javascript>

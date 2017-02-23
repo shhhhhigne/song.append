@@ -92,6 +92,8 @@ def get_song_value(ps_id):
 
     total = 0
     for instance in values:
+        print '*******', instance
+        # if instance.user.user_group.in_group == True:
         total = total + int(instance.value)
 
     return total
@@ -114,7 +116,6 @@ def register_user_vote(user_id, ps_id, vote_value):
             user_vote_object.value = vote_value
 
             db.session.commit()
-
 
             alert = 'your vote is now changed to ' + str(vote_value)
             vote_status = 'changed'
@@ -216,7 +217,6 @@ def get_playlist_data(playlist_id):
     playlist_songs = get_playlist_songs(playlist_id, 'active')
     req_playlist_songs = get_playlist_songs(playlist_id, 'requested')
 
-
     songs = []
 
     for song in playlist_songs:
@@ -266,12 +266,11 @@ def get_group_data(group_id):
     member_query = group_query.filter_by(in_group=True)
     members = member_query.filter(UserGroup.user_id!=admin_id).all()
 
-
-    # members = {}
-
-    # for group_member in group_members:
-    #     members[group_member.user_id] = {'name': group_member.user.fname + ' ' + group_member.user.lname,
-
+    is_member = True
+    try:
+        member_query.filter_by(user_id=user_id).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        is_member = False
 
     playlist_objects = Playlist.query.filter_by(group_id=group_id).all()
 
@@ -283,15 +282,16 @@ def get_group_data(group_id):
         playlists[user_id] = playlists.get(user_id, [])
         playlists[user_id].append(playlist_name)
 
-    # playlist_owners = playlists.user_id
-
     group_data = {'group':group_object,
                   'admin': admin,
                   'is_admin': is_admin,
                   'members': members,
-                  'playlists': playlists}
+                  'playlists': playlists,
+                  'is_member': is_member}
 
     return group_data
+
+# def remove_users_from_group():
 
 
 

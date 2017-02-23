@@ -84,7 +84,7 @@ function populateDropDownGroups(group_info) {
         // console.log(`group name = ${group_name}`)
 
          newItem = $('<li>');
-         newItemLink = $('<a>', { href: '/add-to-group/'+group_id,
+         newItemLink = $('<a>', { href: '/group/'+group_id,
                                   value: group_id
 
         });

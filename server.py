@@ -326,28 +326,41 @@ def add_song_to_playlist(song_id, playlist_id):
 @app.route('/playlist/<playlist_id>')
 def show_playlist(playlist_id):
 
-    # playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
+    playlist_data = get_playlist_data(playlist_id)
 
-    # playlist_songs = get_playlist_songs(playlist_id, 'active')
-    # req_playlist_songs = get_playlist_songs(playlist_id, 'requested')
+    playlist = playlist_data['playlist']
+    songs = playlist_data['songs']
+    req_songs = playlist_data['req_songs']
+
+    user_id = session['user_id']
+
+    group_id = playlist.group_id
+
+    user_object = User.query.filter_by(user_id=playlist.user_id).one()
+
+    if group_id == None:
+        group_name = 'Not Connected to Group'
+    else:
+        group_name = playlist.group.group_name
+
+    is_owner = False
+
+    if playlist.user_id == user_id:
+        is_owner = True
 
 
-    # songs = []
 
-    # for song in playlist_songs:
-    #     song_data = get_song_data(song.song_id)
-    #     song_data['song-value'] = get_song_value(song.ps_id)
-    #     song_data['ps_id'] = song.ps_id
-    #     songs.append(song_data)
+    return render_template('playlist.html',
+                           playlist=playlist,
+                           songs=songs,
+                           req_songs=req_songs,
+                           # user=user_object,
+                           is_owner=is_owner,
+                           group_name=group_name)
 
-    # req_songs = []
-    # for song in req_playlist_songs:
-    #     song_data = get_song_data(song.song_id)
-    #     song_data['ps_id'] = song.ps_id
-    #     song_data['song-value'] = get_song_value(song.ps_id)
-    #     # print '**********', get_song_value(song.ps_id)
-    #     # song_data['song_value'] = get_song_value(song.ps_id)
-    #     req_songs.append(song_data)
+
+@app.route('/playlist/<playlist_id>/edit')
+def edit_playlist(playlist_id):
 
     playlist_data = get_playlist_data(playlist_id)
 
@@ -361,51 +374,25 @@ def show_playlist(playlist_id):
 
     user_object = User.query.filter_by(user_id=playlist.user_id).one()
 
-    groups = Group.query.filter_by(group_id=group_id).one()
+    groups = UserGroup.query.filter_by(user_id=user_id).filter_by(in_group=True).all()
+    # groups = Group.query.filter_by.all()
 
-    group = Group.query.filter_by(group_id=group_id).one()
-
-    is_owner = False
-
-    if playlist.user_id == user_id:
-        #theyre not actually creating this, I might want to refactor this somehow
-        page = 'owned_playlist.html'
-        is_owner = True
-
+    if group_id == None:
+        group = 'Not Connected to Group'
     else:
-        page = 'playlist.html'
+        group = playlist.group
+
+    if playlist.user_id != user_id:
+        return redirect('/playlist/' + playlist_id)
 
 
-    return render_template(page,
+
+    return render_template('owned_playlist.html',
                            playlist=playlist,
                            songs=songs,
                            req_songs=req_songs,
-                           user=user_object,
-                           groups=groups)
-
-
-# @app.route('/playlist/<playlist_id>/edit')
-# def edit_playlist(playlist_id):
-
-
-
-@app.route('/get-all-playlists')
-def show_playlist_list():
-    # playlists = show_all_playlists()
-    # playlists_info = {}
-    # for playlist in playlists['items']:
-    #     if not playlist['name'].endswith('_full'):
-    #         playlists_info[playlist['id']] = playlist['name']
-    # return jsonify(playlists_info)
-
-    # user_id = session['user_id']
-    # users_groups = UserGroup.query.filter_by(user_id=user_id).all()
-    # for users_group in users_groups:
-    #     user_playlists = Playlist.query.filter_by(group_id=users_group.group_id).all()
-
-    # return jsonify(user_playlists)
-    pass
-
+                           groups=groups,
+                           group=group)
 
 @app.route('/get-user-owned-playlists')
 def show_user_owned_playlists():
@@ -439,23 +426,6 @@ def show_user_belonging_playlists():
 
     return jsonify(user_playlists)
 
-    
-
-
-
-
-# @app.route('/get-playlist/<playlist_id>')
-# def get_playlist(playlist_id):
-
-#     playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
-#     playlist_name = playlist_object.playlist_name
-
-#     songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).all()
-    
-
-#     return render_template('playlist.html',
-#                            playlist_object=playlist_object
-#                            )
 
 @app.route('/create-group')
 def create_group_form():
@@ -502,6 +472,23 @@ def edit_group(group_id):
                            non_members=non_members)
 
 
+@app.route('/group/<group_id>')
+def show_group_page(group_id):
+
+    group_data = get_group_data(group_id)
+
+    if group_data['is_member'] == False:
+        return redirect('/')
+
+    group_query = UserGroup.query.filter_by(group_id=group_id)
+    non_members = group_query.filter_by(in_group=False).all()
+
+    return render_template('group.html',
+                           group=group_data['group'],
+                           admin=group_data['admin'],
+                           members=group_data['members'],
+                           playlists=group_data['playlists'],
+                           non_members=non_members)
 
 
 
@@ -516,7 +503,6 @@ def show_user_belonging_groups():
 
     for group in groups:
         user_groups[group.group_id] = group.group_name
-
 
     return jsonify(user_groups)
 
@@ -577,6 +563,88 @@ def update_users_in_group(group_id):
     return 'success'
 
 
+@app.route('/add-member', methods=['POST'])
+def add_member_to_group():
+
+    user_ids = request.form.getlist('user_ids[]')
+    group_id = request.form.get('group_id')
+
+    current_group_object = UserGroup.query.filter_by(group_id=group_id)
+    usernames = []
+
+    return_string = ""
+
+    for user_id in user_ids:
+        try:
+            user_group_object = current_group_object.filter_by(user_id=user_id).one()
+
+            user_group_object.in_group = True
+
+        except sqlalchemy.orm.exc.NoResultFound:
+            user_group_object = UserGroup(user_id=user_id,
+                                          group_id=group_id,
+                                          in_group=True)
+
+            db.session.add(user_group_object)
+
+        db.session.commit()
+        username = user_group_object.user.username
+        return_string = return_string + username + '\n'
+
+    group_name = user_group_object.group.group_name
+    return_string = return_string + 'added to ' + group_name
+
+    return return_string
+
+
+
+@app.route('/remove-member', methods=['POST'])
+def remove_member_from_group():
+
+    group_id = request.form.get('group_id')
+    user_id = request.form.get('user_id')
+
+    user_group_object = UserGroup.query.filter_by(group_id=group_id).filter_by(user_id=user_id).one()
+
+    current_user_id = session['user_id']
+    admin_id = user_group_object.group.user_id
+
+    if current_user_id != admin_id and current_user_id != int(user_id):
+        return 'error, you cannot remove another user if you are not the admin'
+
+    user_group_object.in_group = False
+    db.session.commit()
+
+    users_playlists = Playlist.query.filter_by(group_id=group_id).all()
+
+    for playlist in users_playlists:
+        playlist.group_id = None
+        db.session.commit()
+
+    username = user_group_object.user.username
+    group_name = user_group_object.group.group_name
+
+    return username + ' has been removed from ' + group_name
+
+
+@app.route('/admin-member', methods=['POST'])
+def make_member_admin():
+
+    user_id = request.form.get('user_id')
+    group_id = request.form.get('group_id')
+
+    group_object = Group.query.filter_by(group_id=group_id).one()
+
+    group_object.user_id = user_id
+
+    db.session.commit()
+
+    username = group_object.user.username
+    group_name = group_object.group_name
+
+    return username + ' is now the admin of ' + group_name
+
+
 
 @app.route('/search', methods=['GET'])
 def show_search_results():
@@ -589,7 +657,6 @@ def show_search_results():
                            results=results)
 
 
-
 @app.route('/register-user-vote', methods=['POST'])
 def register_user_vote_form():
 
@@ -599,53 +666,10 @@ def register_user_vote_form():
 
     thumb_id = request.form.get('thumb_id')
 
-
-
-    # try:
-    #     user_vote_object = Vote.query.filter_by(ps_id=ps_id).filter_by(user_id=user_id).one()
-
-    #     if user_vote_object.value == vote_value:
-    #         #This needs to change so that they cant click on the same thumb again
-    #         # or somehow be refactored
-    #         # vote_total = get_song_value(ps_id)
-
-    #         alert = 'you already gave this a' + str(vote_value)
-    #         vote_status = 'same',
-
-    #     else:
-    #         user_vote_object.value = vote_value
-
-    #         db.session.commit()
-
-
-    #         alert = 'your vote is now changed to ' + str(vote_value)
-    #         vote_status = 'changed'
-
-
-    # except sqlalchemy.orm.exc.NoResultFound:
-
-    #     user_vote_object = Vote(value=vote_value,
-    #                             ps_id=ps_id,
-    #                             user_id=user_id)
-
-    #     db.session.add(user_vote_object)
-    #     db.session.commit()
-
-
-    #     alert = 'You gave a vote of ' + str(vote_value)
-    #     vote_status = 'new'
-
     user_vote_info = register_user_vote(user_id, ps_id, vote_value)
-
-    # vote_total = get_song_value(ps_id)
-
-    # song_status_changed = check_song_status(ps_id, vote_total, vote_value)
 
     user_vote_info['ps_id'] = ps_id
     user_vote_info['vote_value'] = vote_value
-    # user_vote_info['vote_total'] = vote_total
-    # user_vote_info['song_status_changed'] = song_status_changed
-
 
     return jsonify(user_vote_info)
 

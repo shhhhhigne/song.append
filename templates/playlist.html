@@ -3,9 +3,16 @@
 
 {% block content %}
 
-<h5>Playlist</h5>
-<h2 class='current-page' value='playlist'>{{ playlist.playlist_name }}</h2>
-<h5>Created by: {{ user.username }} -- {{ user.fname|title }} {{ user.lname|title }}</h5>
+<h5>Playlist </h5>
+<h2 class='current-page' value='playlist'>{{ playlist.playlist_name }}
+{% if is_owner %}
+    <a href='/playlist/{{ playlist.playlist_id }}/edit'>
+    <span class='glyphicon glyphicon-cog'></span>
+    </a>
+{% endif %}
+</h2>
+<h5>Created by: {{ playlist.user.username }} -- {{ playlist.user.fname|title }} {{ playlist.user.lname|title }}</h5>
+<h5>Group: {{ group_name }}</h5>
 
 
 <h3>Tracks</h3>
