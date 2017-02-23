@@ -15,7 +15,7 @@ from model import User, Group, UserGroup, Playlist, PlaylistSong, Vote
 from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists, search
-from spotipy_functions import add_song_to_spotify_playlist
+from spotipy_functions import add_song_to_spotify_playlist, change_playlist_name
 
 from helper_functions import (get_user_groups,
                               get_user_owned_playlists, 
@@ -360,7 +360,7 @@ def show_playlist(playlist_id):
 
 
 @app.route('/playlist/<playlist_id>/edit')
-def edit_playlist(playlist_id):
+def edit_playlist_form(playlist_id):
 
     playlist_data = get_playlist_data(playlist_id)
 
@@ -374,7 +374,7 @@ def edit_playlist(playlist_id):
 
     user_object = User.query.filter_by(user_id=playlist.user_id).one()
 
-    groups = UserGroup.query.filter_by(user_id=user_id).filter_by(in_group=True).all()
+    users_groups = UserGroup.query.filter_by(user_id=user_id).filter_by(in_group=True).all()
     # groups = Group.query.filter_by.all()
 
     if group_id == None:
@@ -391,8 +391,28 @@ def edit_playlist(playlist_id):
                            playlist=playlist,
                            songs=songs,
                            req_songs=req_songs,
-                           groups=groups,
+                           users_groups=users_groups,
                            group=group)
+
+
+@app.route('/playlist/<playlist_id>/edit', methods=['POST'])
+def edit_playlist(playlist_id):
+
+    name = request.form.get('playlist-name')
+    name_req = name + '_req'
+    name_full = name + '_full'
+
+    playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
+
+    playlist_spotify_id = playlist_object.playlist_spotify_id
+    playlist_spotify_id_req = playlist_object.playlist_spotify_id_req
+    playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
+
+
+    change_playlist_name(playlist_spotify_id, name)
+    change_playlist_name(playlist_spotify_id_req, name_req)
+    change_playlist_name(playlist_spotify_id_full, name_full)
+
 
 @app.route('/get-user-owned-playlists')
 def show_user_owned_playlists():

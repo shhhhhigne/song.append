@@ -61,6 +61,18 @@ def create_playlist(playlist_name):
     return playlist['id']
 
 
+def change_playlist_name(playlist_id, new_name):
+
+    token = get_token()
+
+    sp = spotipy.Spotify(auth=token)
+    playlist = sp.user_playlist_change_details(username, 
+                                               playlist_id, 
+                                               name=new_name)
+
+    print playlist
+
+
 def show_user_playlists(playlist_names):
     pass
 
@@ -230,4 +242,14 @@ def search(user_input):
 
 
     return all_results
+
+
+
+
+
+
+
+
+
+
     

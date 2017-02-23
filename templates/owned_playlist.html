@@ -4,15 +4,15 @@
 
 <h1 class='current-page' value='edit-playlist'>Edit Playlist</h1>
 
-<form method='POST' action='/create-playlist' id='playlist-name-form'>
+<form method='POST' action='/playlist/{{ playlist.playlist_id }}/edit' id='playlist-name-form'>
     Playlist Name: <input type='text' name='playlist-name' id='playlist-name' value='{{ playlist.playlist_name }}'>
     <br>
-    Group: <select name='group' class='dropdown'>
-        {% for group in groups %}
-            {% if playlist.group_id == group.group_id %}
-                <option id='{{ group.group_id }}' value='{{ group.group_id }}' selected='selected'>{{ group.group_name }}</option>
+    Group: <select class="selectpicker group-selection">
+        {% for users_group in users_groups %}
+            {% if playlist.group_id == users_group.group.group_id %}
+                <option id='{{ users_group.group.group_id }}' value='{{ users_group.group.group_id }}' selected='selected'>{{ users_group.group_name }}</option>
             {% else %}
-                <option id='{{ group.group_id }}' value='{{ group.group_id }}''>{{ group.group_name }}</option>
+                <option id='{{ users_group.group.group_id }}' value='{{ users_group.group.group_id }}''>{{ users_group.group.group_name }}</option>
             {% endif %}
         {% endfor %}
         </select>
