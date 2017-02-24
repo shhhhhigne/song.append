@@ -233,21 +233,21 @@ def add_song_to_playlist(song_id, playlist_id):
     current_user_id = session['user_id']
     playlist_owner_id = playlist_object.user_id
 
+    override = request.form.get('override')
+    lock = request.form.get('lock')
+
 
     try:
         playlist_song_object = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
 
         status = playlist_song_object.status
 
-        # user_add_try_info['already_in_playlist'] = True
+        if override:
+            playlist_song_object.status = 'active'
+        if lock:
+            playlist_song_object.immutable = 'True'
 
-
-        # Later I will want to change this so that when you add a song already in the playlist
-        # it will check if youve already voted on it and if you have then you cant, otherwise
-        # add one to the vote 
-
-
-        # flash(song_name + 'is already in playlist' + playlist_name)
+        db.session.commit()
 
         already_in_playlist = True
         
@@ -374,7 +374,7 @@ def edit_playlist_form(playlist_id):
 
     user_object = User.query.filter_by(user_id=playlist.user_id).one()
 
-    users_groups = UserGroup.query.filter_by(user_id=user_id).filter_by(in_group=True).all()
+    users_groups = get_user_groups(user_id)
     # groups = Group.query.filter_by.all()
 
     if group_id == None:
@@ -398,20 +398,47 @@ def edit_playlist_form(playlist_id):
 @app.route('/playlist/<playlist_id>/edit', methods=['POST'])
 def edit_playlist(playlist_id):
 
-    name = request.form.get('playlist-name')
-    name_req = name + '_req'
-    name_full = name + '_full'
-
     playlist_object = Playlist.query.filter_by(playlist_id=playlist_id).one()
 
-    playlist_spotify_id = playlist_object.playlist_spotify_id
-    playlist_spotify_id_req = playlist_object.playlist_spotify_id_req
-    playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
+    name = request.form.get('playlist-name')
+    if playlist_object.playlist_name != name:
+        name_req = name + '_req'
+        name_full = name + '_full'
 
 
-    change_playlist_name(playlist_spotify_id, name)
-    change_playlist_name(playlist_spotify_id_req, name_req)
-    change_playlist_name(playlist_spotify_id_full, name_full)
+        playlist_spotify_id = playlist_object.playlist_spotify_id
+        playlist_spotify_id_req = playlist_object.playlist_spotify_id_req
+        playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
+
+
+        change_playlist_name(playlist_spotify_id, name)
+        change_playlist_name(playlist_spotify_id_req, name_req)
+        change_playlist_name(playlist_spotify_id_full, name_full)
+
+        playlist_object.playlist_name = name
+
+    print(request.form)
+
+    group_id = request.form.get('group-selection')
+    if playlist_object.group_id != group_id:
+        playlist_object.group_id = group_id
+
+    num_votes_add = request.form.get('num-to-add')
+    if playlist_object.num_votes_add != num_votes_add:
+        playlist_object.num_votes_add = num_votes_add
+
+    num_votes_del = request.form.get('num-to-del')
+    if playlist_object.num_votes_del != num_votes_del:
+        playlist_object.num_votes_del = num_votes_del
+
+    db.session.commit()
+
+    return redirect('/playlist/' + playlist_id + '/edit')
+
+
+@app.route('/remove-song', methods=['POST'])
+def remove_song_from_playlist():
+    pass
 
 
 @app.route('/get-user-owned-playlists')

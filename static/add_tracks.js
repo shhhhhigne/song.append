@@ -15,7 +15,10 @@ function populateDropDownOwned(playlist_info) {
              $(newItemLink).data('song_id', song_id)
 
             // alert(song_id);
-            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id);
+            // $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id, true);
+            // });
+
+            $(newItemLink).on('click', function() { askOwner($(this).data('song_id'), playlist_id);
             });
             newItem.append(newItemLink);
 
@@ -38,7 +41,7 @@ getOwnedPlaylists();
 function populateDropDownBelong(playlist_info) {
 
     $('.track-playlist-dropdown').append('<li role="separator" class="divider"></li>');
-    $('.track-playlist-dropdown').append('<li class="dropdown-header owned-playlists">Belong to Playlists</li>')
+    $('.track-playlist-dropdown').append('<li class="dropdown-header belong-playlists">Belong to Playlists</li>')
 
     $.each($('.track-playlist-dropdown'), function() {
             // body...
@@ -57,7 +60,7 @@ function populateDropDownBelong(playlist_info) {
             $(newItemLink).data('song_id', song_id)
 
             // alert(song_id);
-            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), $(this).data('playlist_id'));
+            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), $(this).data('playlist_id'), false, false);
             });
 
 
@@ -94,11 +97,54 @@ function songAddedToPlaylistSuccess(results){
     
 }
 
-function addSongToPlaylist(song_id, playlist_id) {
+
+function askOwner(song_id, playlist_id) {
+    var override = $.confirm({ title: 'Override?',
+            content: 'Would you like to suggest this song or simply add it',
+            buttons: {
+                add: function () {
+                    var lock = $.confirm({ title: 'Lock?',
+                            content: 'Would you like to lock this song in the playlist?',
+                            buttons: {
+                                Yes: function (){
+                                   
+                                        addSongToPlaylist(song_id, playlist_id, true, true);
+                                    
+                                },
+                                No: function (){
+                                        addSongToPlaylist(song_id, playlist_id, true, false)
+                                                                    }
+                            } 
+                        });
+                },
+                suggest: function () {
+                        addSongToPlaylist(song_id, playlist_id, true, true);
+                    // action: function () {
+                    //     addSongToPlaylist(song_id, playlist_id, false, false);
+                    // }
+                }
+            }
+        });
+}
+
+
+function addSongToPlaylist(song_id, playlist_id, override, lock) {
+
+    // var os = 'not overriden'
+    // var ls = 'unlocked'
+    // if (override == true) {
+    //     os = 'overriden'
+    // }
+    // if (lock == true) {
+    //     ls = 'locked'
+    // }
+    // alert(song_id + ' ' +  playlist_id  + ' ' +   os  + ' ' +   ls)
 
 
     songIds = {'song_id': song_id,
-               'playlist_id': playlist_id
+               'playlist_id': playlist_id,
+               'override': override,
+               'lock': lock
     };
 
     $.post('/add-song-to-playlist/' + song_id + '/' + playlist_id,

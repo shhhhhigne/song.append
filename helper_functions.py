@@ -30,7 +30,8 @@ def get_user_groups(user_id):
             group = Group.query.filter_by(group_id=users_group.group_id).one()
             groups.append(group)
         else:
-            print "not in ", users_group.group_id
+            continue
+            # print "not in ", users_group.group_id
 
     return groups
 
@@ -92,7 +93,7 @@ def get_song_value(ps_id):
 
     total = 0
     for instance in values:
-        print '*******', instance
+        # print '*******', instance
         # if instance.user.user_group.in_group == True:
         total = total + int(instance.value)
 
@@ -150,6 +151,9 @@ def register_user_vote(user_id, ps_id, vote_value):
 def check_song_status(ps_id, vote_total, vote_value):
 
     ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
+    immutable = ps_object.immutable
+    if immutable == True:
+        return False
 
     playlist_object = Playlist.query.filter_by(playlist_id=ps_object.playlist_id).one()
 

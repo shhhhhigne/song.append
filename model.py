@@ -204,6 +204,7 @@ class PlaylistSong(db.Model):
 
     # status can be (active, requested, or deleted) -- if never added to playlist not issue
     status = db.Column(db.String(10), nullable=False) 
+    immutable = db.Column(db.Boolean, default=False, nullable=False)
 
     # the index in the playlist
     index = db.Column(db.Integer, nullable=False) 

@@ -41,7 +41,7 @@ def get_token():
     #     SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
     now = datetime.now()
 
-    if sp_info['expiration_time'] - now == timedelta(minutes=0):
+    if 'expiration_time' not in sp_info or sp_info['expiration_time'] - now == timedelta(minutes=0):
         initialize_auth()
 
     token = sp_info['access_token']
@@ -67,10 +67,12 @@ def change_playlist_name(playlist_id, new_name):
 
     sp = spotipy.Spotify(auth=token)
     playlist = sp.user_playlist_change_details(username, 
-                                               playlist_id, 
-                                               name=new_name)
+                                               str(playlist_id), 
+                                               name=str(new_name),
+                                               public=None,
+                                               collaborative=None)
 
-    print playlist
+    # print playlist
 
 
 def show_user_playlists(playlist_names):
@@ -105,7 +107,7 @@ def remove_song_from_spotify_playlist(song_id, playlist_id):
     token = get_token()
 
     sp = spotipy.Spotify(auth=token)
-    sp.user_playlist_remove_specific_occurrences_of_tracks(username, playlist_id, list(song_id))
+    sp.user_playlist_remove_specific_occurrences_of_tracks(username, str(playlist_id), list(str(song_id)))
 
 
 def get_playlist_info(playlist_id):

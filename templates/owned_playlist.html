@@ -7,12 +7,13 @@
 <form method='POST' action='/playlist/{{ playlist.playlist_id }}/edit' id='playlist-name-form'>
     Playlist Name: <input type='text' name='playlist-name' id='playlist-name' value='{{ playlist.playlist_name }}'>
     <br>
-    Group: <select class="selectpicker group-selection">
+    Group: <select class="selectpicker group-selection" name='group-selection'>
+        <option disabled selected value> -- select an option -- </option>
         {% for users_group in users_groups %}
-            {% if playlist.group_id == users_group.group.group_id %}
-                <option id='{{ users_group.group.group_id }}' value='{{ users_group.group.group_id }}' selected='selected'>{{ users_group.group_name }}</option>
+            {% if playlist.group_id == users_group.group_id %}
+                <option id='{{ users_group.group_id }}' value='{{ users_group.group_id }}' selected='selected'>{{ users_group.group_name }}</option>
             {% else %}
-                <option id='{{ users_group.group.group_id }}' value='{{ users_group.group.group_id }}''>{{ users_group.group.group_name }}</option>
+                <option id='{{ users_group.group_id }}' value='{{ users_group.group_id }}''>{{ users_group.group_name }}</option>
             {% endif %}
         {% endfor %}
         </select>
@@ -58,8 +59,13 @@
             </td>
             <td><a href='track/{{ song["album"].album_id }}'>{{ song["album"].album_name }}</a></td>
             <td>
-                <a id='{{ song["ps_id"] }}*1' class='user-vote upvote' data-song_id='{{ song["ps_id"] }}'><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>
-                <a id='{{ song["ps_id"] }}*-1' class='user-vote downvote' data-song_id='{{ song["ps_id"] }}'><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+                <span class="dropdown">
+                <span class="glyphicon glyphicon-option-horizontal dropdown-toggle editDropdown" id="{{ song['ps_id'] }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="editDropdown">
+                    <li id="{{ song['ps_id'] }}-remove" class='remove-song' data-ps_id="{{ song['ps_id'] }}"><a>Remove From Playlist</a></li>
+                    <li><a href="#">Lock in Playlist</a></li>
+                </ul> 
+                </span>
             </td>
         </tr>
 
