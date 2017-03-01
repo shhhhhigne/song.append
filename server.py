@@ -629,6 +629,21 @@ def show_group_page(group_id):
 
 
 
+@app.route('/get-user-admin-groups')
+def show_user_admin_groups():
+    user_id = session['user_id']
+
+    groups = get_user_groups(user_id)
+
+    user_groups = {}
+
+    for group in groups:
+        if group.user_id == user_id:
+            user_groups[group.group_id] = group.group_name
+
+    return jsonify(user_groups)
+
+
 
 @app.route('/get-user-belonging-groups')
 def show_user_belonging_groups():
@@ -639,9 +654,13 @@ def show_user_belonging_groups():
     user_groups = {}
 
     for group in groups:
-        user_groups[group.group_id] = group.group_name
+        if group.user_id != user_id:
+            user_groups[group.group_id] = group.group_name
 
     return jsonify(user_groups)
+
+
+
 
 
 @app.route('/add-to-group/<group_id>', methods=['GET'])
@@ -726,10 +745,10 @@ def add_member_to_group():
 
         db.session.commit()
         username = user_group_object.user.username
-        return_string = return_string + username + '\n'
+        return_string = return_string + username + ', '
 
     group_name = user_group_object.group.group_name
-    return_string = return_string + 'added to ' + group_name
+    return_string = return_string[:-1]
 
     return return_string
 

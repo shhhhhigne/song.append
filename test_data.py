@@ -137,6 +137,10 @@ def create_sample_playlists(num):
         db.session.add(playlist_object)
         db.session.commit()
 
+def add_songs_to_playlists(playlist_id):
+    pass
+
+
 
 
 

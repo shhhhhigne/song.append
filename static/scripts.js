@@ -86,7 +86,7 @@ function populateDropDownGroupsAdmin(group_info) {
         // console.log(`group name = ${group_name}`)
 
          newItem = $('<li>');
-         newItemLink = $('<a>', { href: '/group/'+group_id,
+         newItemLink = $('<a>', { href: '/edit-group/'+group_id,
                                   value: group_id
 
         });
@@ -114,15 +114,18 @@ function populateDropDownGroupsAdmin(group_info) {
 
 function getAdminGroups() {
     $.get('/get-user-admin-groups',
-          populateDropDownGroups);
+          populateDropDownGroupsAdmin);
 }
 
-getGroups();
+getAdminGroups();
 
 function populateDropDownGroups(group_info) {
     // console.log('popu')
 
     // console.log(group_info)
+    $('#dropdown-group-menu').append('<li role="separator" class="divider"></li>');
+    $('#dropdown-group-menu').append('<li class="dropdown-header admin-group">Belonging Groups</li>')
+
 
     for (group_id in group_info) {
         var group_name = group_info[group_id];
