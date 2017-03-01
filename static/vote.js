@@ -24,22 +24,52 @@ function userVoted(results) {
     var alt_thumb_id = ps_id + '_' + alt_vote_value + '_thumb';
 
     var vote_status = results['vote_status'];
-    alert(results['user_alert']);
+    // alert(results['user_alert']);
+
+    // var alertThumb = $('<i>')
+    //  newItemLink = $('<a>', {value: playlist_id,
+    //                                 class: 'add-song-link'
+
+    if (results['vote_value'] == -1) {
+        var alertThumb = "<span class='glyphicon glyphicon-thumbs-down'></span>"
+
+    }
+    if (results['vote_value'] == 1) {
+        alertThumb = "<span class='glyphicon glyphicon-thumbs-up'></span>"
+    }
 
     var vote_total_id = ps_id + '_total';
 
-    if (vote_status == 'same') {
+    if (vote_status == 'same') { 
+        $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: 'You already gave this song a vote of ' + alertThumb,
+            content: 'No stuffing the ballot boxes'
+        });
         return;
     }
     else if (vote_status == 'changed') {
+        $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: 'Your vote is now changed to ' + alertThumb,
+            content: "It's ok to change your mind"
+        });
         $('#'+alt_thumb_id).removeClass('voted-on');
 
+    }
+    else if (vote_status == 'new') {
+        $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: 'Your gave a vote of ' + alertThumb,
+            content: 'Thank you, your opinion is noted'
+        });
     }
     $('#'+thumb_id).addClass('voted-on');
     console.log(results['vote_total'])
     $('#'+vote_total_id).text(results['vote_total']);
 
-    if (results['status_changed'] == true) {
+    if (results['song_status_changed'] == true) {
+        // alert('hey')
         location.reload(true);
     }
 

@@ -63,7 +63,7 @@
                 <span class="glyphicon glyphicon-option-horizontal dropdown-toggle editDropdown" id="{{ song['ps_id'] }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="editDropdown">
                     <li id="{{ song['ps_id'] }}-remove" class='remove-song' data-ps_id="{{ song['ps_id'] }}"><a>Remove From Playlist</a></li>
-                    <li><a href="#">Lock in Playlist</a></li>
+                    <li class='lock-song' data-ps_id="{{ song['ps_id'] }}"><a id="{{ song['ps_id'] }}-lock">??</a></li>
                 </ul> 
                 </span>
             </td>
@@ -76,7 +76,10 @@
 </tbody>
 
 <script src='/static/vote.js'></script>
+<script src='/static/tracks.js'></script>
+
 
 
 
 {% endblock %}
+{% block javascript %}owned_playlist{% endblock %}

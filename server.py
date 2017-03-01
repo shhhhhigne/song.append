@@ -26,7 +26,8 @@ from helper_functions import (get_user_groups,
                               check_song_status,
                               register_user_vote,
                               get_playlist_data,
-                              get_group_data)
+                              get_group_data,
+                              remove_song_fully)
 
 
 app = Flask(__name__)
@@ -98,9 +99,17 @@ def register_process():
 
     session['user_id'] = user_object.user_id
     session['logged_in'] = True
+    session['email'] = user_object.email
     session['username'] = user_object.username
     print(session)
     flash("Logged In")
+
+    for group in Group.query.all():
+        user_group_object = UserGroup(group_id=group.group_id,
+                                      user_id=user_object.user_id)
+        db.session.add(user_group_object)
+        db.session.commit()
+
     return redirect("/")
 
 
@@ -134,6 +143,7 @@ def sign_in_process():
     session['user_id'] = user_id
     session['logged_in'] = True
     session['email'] = user_object.email
+    session['username'] = user_object.email
 
     print(session)
     flash("Logged In")
@@ -144,6 +154,8 @@ def sign_in_process():
 def logout_process():
     if session.get('logged_in') is True:
         del session['user_id']
+        del session['username']
+        del session['email']
         del session['logged_in']
         flash('logged out')
     else:
@@ -219,7 +231,7 @@ def create_playlist_form():
     # # Once we're done, we should commit our work
     # db.session.commit()
 
-    return redirect("/")
+    return redirect("/playlist/" + str(playlist_object.playlist_id))
 
 @app.route('/add-song-to-playlist/<song_id>/<playlist_id>', methods=['POST'])
 def add_song_to_playlist(song_id, playlist_id):
@@ -438,7 +450,65 @@ def edit_playlist(playlist_id):
 
 @app.route('/remove-song', methods=['POST'])
 def remove_song_from_playlist():
-    pass
+
+    ps_id = request.form.get('ps_id')
+
+    ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
+
+    lock_status = 'unlocked'
+    if ps_object.immutable:
+        lock_status = 'locked'
+
+    remove_info = jsonify({'lock_status': lock_status,
+                           'song_name': ps_object.song.song_name,
+                           'playlist_name': ps_object.playlist.playlist_name})
+
+    remove_song_fully(ps_object)
+
+    return remove_info
+
+
+@app.route('/get-lock-status', methods=['POST'])
+def get_lock_status():
+
+    ps_ids = request.form.getlist('ps_ids[]')
+
+    lock_statuses = []
+
+    for ps_id in ps_ids:
+
+        ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
+
+        lock_info = {'ps_id': ps_id,
+                     'lock_status': ps_object.immutable}
+
+        lock_statuses.append(lock_info)
+
+    return jsonify(lock_statuses)
+
+@app.route('/lock-song', methods=['POST'])
+def lock_unlock_song_in_playlist():
+
+    ps_id = request.form.get('ps_id')
+    old_lock_status = request.form.get('old_lock_status')
+    
+    ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
+
+    if old_lock_status == 'unlocked':
+        ps_object.immutable = True
+        new_lock_status = 'locked'
+    elif old_lock_status == 'locked':
+        ps_object.immutable = False
+        new_lock_status = 'unlocked'
+
+
+    lock_info = jsonify({'new_lock_status': new_lock_status,
+                         'song_name': ps_object.song.song_name,
+                         'playlist_name': ps_object.playlist.playlist_name})
+
+    db.session.commit()
+
+    return lock_info
 
 
 @app.route('/get-user-owned-playlists')
@@ -496,7 +566,25 @@ def create_group():
 
     group_id = group_object.group_id
 
-    return redirect('/add-to-group/' + str(group_id))
+    group_admin_object = UserGroup(group_id=group_id,
+                                   user_id=user_id,
+                                   in_group=True)
+
+    db.session.add(group_admin_object)
+
+    for user in User.query.all():
+        try:
+            UserGroup.query.filter_by(user_id=user.user_id).filter_by(group_id=group_id).one()
+            print 'heyyyyyyyyyyyyyyyy'
+        except sqlalchemy.orm.exc.NoResultFound:
+            user_group_object = UserGroup(group_id=group_id,
+                                          user_id=user.user_id)
+            db.session.add(user_group_object)
+
+    db.session.commit()
+
+
+    return redirect('/edit-group/' + str(group_id))
 
 
 @app.route('/edit-group/<group_id>')
@@ -507,6 +595,8 @@ def edit_group(group_id):
 
     group_query = UserGroup.query.filter_by(group_id=group_id)
     non_members = group_query.filter_by(in_group=False).all()
+    print 'non members:', non_members
+
 
     if not group_data['is_admin']:
         return redirect('/')
@@ -726,7 +816,6 @@ def get_current_user_votes():
 
     user_id = session['user_id']
 
-    print '******', 
     ps_ids = request.form.getlist('ps_ids[]')
 
     votes = []

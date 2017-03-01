@@ -1,5 +1,10 @@
 function memberRemoved(results) {
-    alert(results)
+    // alert(results)
+    $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: results,
+            content: 'This person and this group are no longer connected. All playlist connections are terminated'
+        });
     location.reload(true);
 
 }
@@ -87,7 +92,12 @@ $('.add_member').on('click', addMember);
 
 
 function newMemberAdmin(results) {
-    alert(results)
+    // alert(results)
+    $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: results,
+            content: 'This person and this group are now connected. All playlist connections are in place'
+        });
     location.reload(true);
 
 }

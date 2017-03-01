@@ -155,54 +155,60 @@ def check_song_status(ps_id, vote_total, vote_value):
     if immutable == True:
         return False
 
-    playlist_object = Playlist.query.filter_by(playlist_id=ps_object.playlist_id).one()
+    # playlist_object = Playlist.query.filter_by(playlist_id=ps_object.playlist_id).one()
 
-    score_to_add = playlist_object.num_votes_add
-    score_to_del = -(playlist_object.num_votes_del)
+    score_to_add = ps_object.playlist.num_votes_add
+    score_to_del = -(ps_object.playlist.num_votes_del)
 
-    playlist_name = playlist_object.playlist_name
-    playlist_name_req = playlist_name + '_req'
-    playlist_name_full = playlist_name + '_full'
+    # playlist_name = playlist_object.playlist_name
+    # playlist_name_req = playlist_name + '_req'
+    # playlist_name_full = playlist_name + '_full'
 
-    playlist_spotify_id_act = playlist_object.playlist_spotify_id
-    playlist_spotify_id_req = playlist_object.playlist_spotify_id_req
-    playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
+    # playlist_spotify_id_act = playlist_object.playlist_spotify_id
+    # playlist_spotify_id_req = playlist_object.playlist_spotify_id_req
+    # playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
 
     song_status = ps_object.status
     status_changed = False
 
-    song_object = Song.query.filter_by(song_id=ps_object.song_id).one()
-    song_spotify_id = song_object.song_spotify_id
+    # song_object = Song.query.filter_by(song_id=ps_object.song_id).one()
+    # song_spotify_id = song_object.song_spotify_id
 
     if vote_value == -1:
         if vote_total <= score_to_del and song_status != 'deleted':
-            ps_object.status = 'deleted'
-            db.session.commit()
+            
             status_changed = True
 
-            remove_song_from_spotify_playlist(playlist_spotify_id_full, song_spotify_id)
+            remove_song_fully(ps_object)
 
-            if song_status == 'active':
-                remove_song_from_spotify_playlist(playlist_spotify_id_act, song_spotify_id)
-            else:
-                remove_song_from_spotify_playlist(playlist_spotify_id_req, song_spotify_id)
+            # remove_song_helper(song_spotify_id, playlist_object, '_full')
+            # remove_song_from_spotify_playlist(playlist_spotify_id_full, song_spotify_id)
+
+            # if song_status == 'active':
+            #     remove_song_from_spotify_playlist(playlist_spotify_id_act, song_spotify_id)
+            # else:
+            #     remove_song_from_spotify_playlist(playlist_spotify_id_req, song_spotify_id)
     # Should I have this as an if or as an elif
     elif vote_value == 1:
         if song_status == 'deleted':
-            ps_object.status ='requested'
-            db.session.commit()
+            
             status_changed = True
+            readd_song_to_req(ps_object)
 
-            add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_full)
-            add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_req)
+            # add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_full)
+            # add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_req)
 
         elif vote_total >= score_to_add and song_status == 'requested':
-            ps_object.status ='active'
-            db.session.commit()
+            # ps_object.status ='active'
+            # db.session.commit()
             status_changed = True
+            move_song_req_to_act(ps_object)
 
-            add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_act)
-            remove_song_from_spotify_playlist(song_spotify_id, playlist_spotify_id_req)
+            # import pdb
+            # pdb.set_trace()
+
+            # add_song_to_spotify_playlist([song_spotify_id], playlist_spotify_id_act)
+            # remove_song_from_spotify_playlist([song_spotify_id], playlist_spotify_id_req)
 
     # I could just check the status changed here
     # should I recall the view playlists here?? h
@@ -296,6 +302,90 @@ def get_group_data(group_id):
     return group_data
 
 # def remove_users_from_group():
+
+
+def move_song_req_to_act(ps_object):
+
+    song_spotify_id = ps_object.song.song_spotify_id
+    playlist_object = ps_object.playlist
+
+    add_song_helper(song_spotify_id, playlist_object, 'actv')
+    remove_song_helper(song_spotify_id, playlist_object, 'req')
+
+    ps_object.status ='active'
+    db.session.commit()
+
+
+def readd_song_to_req(ps_object):
+
+    song_spotify_id = ps_object.song.song_spotify_id
+    playlist_object = ps_object.playlist
+
+    add_song_helper(song_spotify_id, playlist_object, 'full')
+    add_song_helper(song_spotify_id, playlist_object, 'req')
+
+    ps_object.status ='requested'
+    db.session.commit()
+
+
+def remove_song_fully(ps_object):
+
+    print ps_object
+
+    song_spotify_id = ps_object.song.song_spotify_id
+    playlist_object = ps_object.playlist
+
+    remove_song_helper(song_spotify_id, playlist_object, 'full')
+
+    status = ps_object.status
+
+    if status == 'requested':
+        playlist_type = 'req'
+
+    if status == 'active':
+        playlist_type = 'actv'
+
+    remove_song_helper(song_spotify_id, playlist_object, playlist_type)
+
+    ps_object.status = 'deleted'
+    db.session.commit()
+
+
+def remove_song_helper(song_spotify_id, playlist_object, playlist_type):
+
+    playlist_name = playlist_object.playlist_name + playlist_type
+    if playlist_type == 'req':
+        playlist_spotify_id = playlist_object.playlist_spotify_id_req
+    elif playlist_type == 'full':
+        playlist_spotify_id = playlist_object.playlist_spotify_id_full
+    else:
+        playlist_spotify_id = playlist_object.playlist_spotify_id
+
+    song_id = []
+    song_id.append(song_spotify_id)
+
+
+    remove_song_from_spotify_playlist(song_id, playlist_spotify_id)
+
+
+def add_song_helper(song_spotify_id, playlist_object, playlist_type):
+
+    # playlist_id_s = playlist_spotify_id + playlist_type
+    playlist_name = playlist_object.playlist_name + playlist_type
+    if playlist_type == 'req':
+        playlist_spotify_id = playlist_object.playlist_spotify_id_req
+    elif playlist_type == 'full':
+        playlist_spotify_id = playlist_object.playlist_spotify_id_full
+    else:
+        playlist_spotify_id = playlist_object.playlist_spotify_id
+
+    song_id = []
+    song_id.append(song_spotify_id)
+
+    add_song_to_spotify_playlist(song_id, playlist_spotify_id)
+
+
+
 
 
 

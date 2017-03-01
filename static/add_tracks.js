@@ -12,13 +12,17 @@ function populateDropDownOwned(playlist_info) {
                                     class: 'add-song-link'
             });
 
-             $(newItemLink).data('song_id', song_id)
+            $(newItemLink).data('playlist_id', playlist_id)
+
+
+            $(newItemLink).data('song_id', song_id)
 
             // alert(song_id);
             // $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), playlist_id, true);
             // });
 
-            $(newItemLink).on('click', function() { askOwner($(this).data('song_id'), playlist_id);
+            $(newItemLink).on('click', function() { 
+                askOwner($(this).data('song_id'), $(this).data('playlist_id'));
             });
             newItem.append(newItemLink);
 
@@ -60,7 +64,10 @@ function populateDropDownBelong(playlist_info) {
             $(newItemLink).data('song_id', song_id)
 
             // alert(song_id);
-            $(newItemLink).on('click', function() { addSongToPlaylist($(this).data('song_id'), $(this).data('playlist_id'), false, false);
+            // console.log(song_id)
+            // console.log(playlist_id)
+            $(newItemLink).on('click', function() { 
+                addSongToPlaylist($(this).data('song_id'), $(this).data('playlist_id'), false, false);
             });
 
 
@@ -93,7 +100,13 @@ function songAddedToPlaylistSuccess(results){
 
     console.log(results)
 
-    alert(`${song_name} ${add_alert} ${playlist_name} \n ${user_alert}`)
+    $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: `${song_name} ${add_alert} ${playlist_name}`,
+            content: `${user_alert}`
+        });
+
+    // alert(`${song_name} ${add_alert} ${playlist_name} \n ${user_alert}`)
     
 }
 
@@ -107,8 +120,9 @@ function askOwner(song_id, playlist_id) {
                             content: 'Would you like to lock this song in the playlist?',
                             buttons: {
                                 Yes: function (){
-                                   
-                                        addSongToPlaylist(song_id, playlist_id, true, true);
+                                    // console.log(song_id)
+                                    // console.log (playlist_id)
+                                    addSongToPlaylist(song_id, playlist_id, true, true);
                                     
                                 },
                                 No: function (){
