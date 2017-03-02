@@ -8,10 +8,13 @@ function songRemoved(results) {
     $.alert({
             // icon: 'glyphicon glyphicon-thumbs-up',
             title: `${song_name} removed from ${playlist_name}`,
-            content: `It is ${lock_status}`
+            content: `It is ${lock_status}`,
+            onClose: function() {
+                location.reload(true);
+
+            }
         });
 
-    location.reload(true);
 
 }
 
@@ -22,7 +25,7 @@ function removeSong() {
     var remove_info = {'ps_id': ps_id,
     };
 
-    $.post('/remove-song',
+    $.post('/admin-remove-song',
            remove_info,
            songRemoved
     );
@@ -30,6 +33,40 @@ function removeSong() {
 }
 
 $('.remove-song').on('click', removeSong);
+
+function songAdded(results) {
+    // alert(results)
+
+    song_name = results['song_name'];
+    playlist_name = results['playlist_name'];
+    lock_status = results['lock_status'];
+
+    $.alert({
+            // icon: 'glyphicon glyphicon-thumbs-up',
+            title: `${song_name} moved to active on ${playlist_name}`,
+            content: `It is ${lock_status}`,
+            onClose: function() {
+                location.reload(true);
+
+            }
+        });
+}
+
+function addSong() {
+
+    var ps_id = $(this).data('ps_id');
+    
+    var add_info = {'ps_id': ps_id,
+    };
+
+    $.post('/admin-add-song',
+           add_info,
+           songAdded
+    );
+
+}
+
+$('.add-song').on('click', addSong);
 
 
 
@@ -129,3 +166,7 @@ function lockSong() {
 
 
 $('.lock-song').on('click', lockSong);
+
+function sumbitChanges() {}
+
+$('.done-editing').on('click', submitChanges)

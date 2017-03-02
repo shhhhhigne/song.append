@@ -8,8 +8,6 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
-import re
-
 from model import Album, Song, Artist, SongArtist
 from model import User, Group, UserGroup, Playlist, PlaylistSong, Vote
 from model import connect_to_db, db
@@ -33,3 +31,32 @@ from helper_functions import (get_user_groups,
                               remove_song_helper,
                               add_song_helper)
 
+from test_data import create_test_data
+
+from unittest import TestCase
+
+app = Flask(__name__)
+
+class BasicTests(TestCase):
+
+        @classmethod
+        def setUp(cls):
+            """Stuff to do once before running all tests."""
+
+            # Connect to test database
+            connect_to_db(app, "postgresql:///test_collabplaylists")
+
+            # Create tables and add sample data
+            db.create_all()
+
+            create_test_data()
+
+
+
+        @classmethod
+        def tearDown(cls):
+
+            db.session.close()
+            db.drop_all()
+
+            

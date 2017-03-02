@@ -49,6 +49,14 @@ class PlaylistTests(unittest.TestCase):
         self.assertIn("Create Playlist", result.data)
         self.assertNotIn("Homepage", result.data)
 
+    def test_rsvp(self):
+        result = self.client.post("/login",
+                                  data={'name': "Jane", 'email': "jane@jane.com"},
+                                  follow_redirects=True)
+        self.assertIn("Yay!", result.data)
+        self.assertIn("Party Details", result.data)
+        self.assertNotIn("Please RSVP", result.data)
+
 #     def test_rsvp(self):
 #         result = self.client.post("/rsvp",
 #                                   data={'name': "Jane", 'email': "jane@jane.com"},

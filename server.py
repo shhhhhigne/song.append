@@ -27,7 +27,8 @@ from helper_functions import (get_user_groups,
                               register_user_vote,
                               get_playlist_data,
                               get_group_data,
-                              remove_song_fully)
+                              remove_song_fully,
+                              move_song_req_to_act)
 
 
 app = Flask(__name__)
@@ -246,18 +247,36 @@ def add_song_to_playlist(song_id, playlist_id):
     playlist_owner_id = playlist_object.user_id
 
     override = request.form.get('override')
+
+    # print '^^^^^^^^^^^override: ', override
     lock = request.form.get('lock')
+    # print '^^^^^^^^^^^lock: ', lock
+
+    if override == 'true':
+        status = 'active'
+    else:
+        status = 'requested'
+
+    if lock == 'true':
+        immutable = True
+    else:
+        immutable = False
 
 
     try:
         playlist_song_object = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
 
-        status = playlist_song_object.status
+        current_status = playlist_song_object.status
 
-        if override:
+        # if override:
+        #     playlist_song_object.status = 'active'
+        # if lock:
+        #     playlist_song_object.immutable = True
+
+        if override is True:
             playlist_song_object.status = 'active'
-        if lock:
-            playlist_song_object.immutable = 'True'
+        if lock is True:
+            playlist_object.immutable = True
 
         db.session.commit()
 
@@ -274,33 +293,50 @@ def add_song_to_playlist(song_id, playlist_id):
         song_spotify_id = [song_object.song_spotify_id]
         playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
 
-        if current_user_id == playlist_owner_id:
-            status = 'active'
+        count = PlaylistSong.query.filter_by(playlist_id=playlist_id).count()
+        index = count + 1
 
-            count = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status='active').count()
-            index = count + 1
 
-            playlist_spotify_id = playlist_object.playlist_spotify_id
 
-            add_alert = 'added to'
+        # if current_user_id == playlist_owner_id:
 
-        else:
-            status = 'requested'
+        #     status = 'active'
 
-            count = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).count()
-            index = count + 1
+        #     # count = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status='active').count()
+        #     index = count + 1
 
-            playlist_spotify_id = playlist_object.playlist_spotify_id_req
+        #     playlist_spotify_id = playlist_object.playlist_spotify_id
 
-            add_alert = 'requested for'
+        #     add_alert = 'added to'
+
+        # else:
+        #     status = 'requested'
+
+        #     count = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).count()
+        #     index = count + 1
+
+        #     playlist_spotify_id = playlist_object.playlist_spotify_id_req
+
+        #     add_alert = 'requested for'
 
         playlist_song_object = PlaylistSong(song_id=song_id,
                                             playlist_id=playlist_id,
                                             status = status,
+                                            immutable=immutable,
                                             index=index)
 
         db.session.add(playlist_song_object)
         db.session.commit()
+
+        status = playlist_song_object.status
+
+        if status == 'requested':
+            playlist_spotify_id = playlist_object.playlist_spotify_id_req
+            add_alert = 'requested for'
+
+        if status == 'active':
+            playlist_spotify_id = playlist_object.playlist_spotify_id
+            add_alert = 'added to'
 
         add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id)
         add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_full)
@@ -448,8 +484,8 @@ def edit_playlist(playlist_id):
     return redirect('/playlist/' + playlist_id + '/edit')
 
 
-@app.route('/remove-song', methods=['POST'])
-def remove_song_from_playlist():
+@app.route('/admin-remove-song', methods=['POST'])
+def owner_remove_song_from_playlist():
 
     ps_id = request.form.get('ps_id')
 
@@ -467,6 +503,25 @@ def remove_song_from_playlist():
 
     return remove_info
 
+
+@app.route('/admin-add-song', methods=['POST'])
+def owner_add_song_to_playlist():
+
+    ps_id = request.form.get('ps_id')
+
+    ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
+
+    lock_status = 'unlocked'
+    if ps_object.immutable:
+        lock_status = 'locked'
+
+    add_info = jsonify({'lock_status': lock_status,
+                        'song_name': ps_object.song.song_name,
+                        'playlist_name': ps_object.playlist.playlist_name})
+
+    move_song_req_to_act(ps_object)
+
+    return add_info
 
 @app.route('/get-lock-status', methods=['POST'])
 def get_lock_status():

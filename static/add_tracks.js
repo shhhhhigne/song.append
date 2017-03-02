@@ -132,7 +132,7 @@ function askOwner(song_id, playlist_id) {
                         });
                 },
                 suggest: function () {
-                        addSongToPlaylist(song_id, playlist_id, true, true);
+                        addSongToPlaylist(song_id, playlist_id, false, false);
                     // action: function () {
                     //     addSongToPlaylist(song_id, playlist_id, false, false);
                     // }
