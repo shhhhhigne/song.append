@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
-{% block title %}Registration{% endblock %}
+{% block title %}Create Group{% endblock %}
+{% block pagetitle %}New Group{% endblock %}
 {% block content %}
 
+
+<span class='row'>
+<span class='col-sm-4'></span>
+<span class='col-sm-4 user-info-form'>
 <h1 class='current-page' value='create-group'>Create Group</h1>
+<br>
 
 <form method='POST' action='/create-group' id='group-name-form'>
-    Group Name: <input type='text' name='group-name' id='group-name'>
-    <input type='submit' name='Submit'>
+    <input type='text' name='group-name' id='group-name'>GROUP NAME
+    <input type='submit' name='Submit' class='submit'>
 </form>
+
+</span>
+</span>
 
 
 

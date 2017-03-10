@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Search results{% endblock %}
+{% block title %}Playlist{% endblock %}
+{% block pagetitle %}Playlist{% endblock %}
 
 {% block content %}
 
-<h5>Playlist </h5>
 <h2 class='current-page' value='playlist'>{{ playlist.playlist_name }}
 {% if is_owner %}
-    <a href='/playlist/{{ playlist.playlist_id }}/edit'>
-    <span class='glyphicon glyphicon-cog'></span>
+    <a class='edit-button' href='/playlist/{{ playlist.playlist_id }}/edit'>
+    <span class='glyphicon glyphicon-edit'></span>
     </a>
 {% endif %}
 </h2>
-<h5>Created by: {{ playlist.user.username }} -- {{ playlist.user.fname|title }} {{ playlist.user.lname|title }}</h5>
-<h5>Group: {{ group_name }}</h5>
+<div class='playlist-info'>
+<h5><span class='playlist-data-label'>Created by:</span> <span class='playlist-data'>{{ playlist.user.username }} -- {{ playlist.user.fname|title }} {{ playlist.user.lname|title }}</span></h5>
+<h5><span class='playlist-data-label'>Group:</span> <span class='playlist-data'>{{ group_name }}</span></h5>
+</div>
 
 
 <h3>Tracks</h3>
@@ -23,6 +25,7 @@
     <th>Song</th>
     <th>Artist</th>
     <th>Album</th>
+    <th> </th>
     <th> </th>
     <th> </th>
 </tr>
@@ -53,6 +56,7 @@
                 <a id='{{ song["ps_id"] }}_-1' class='user-vote downvote' data-song_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_-1_thumb' class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
             </td>
             <td id='{{ song["ps_id"] }}_total'>{{ song['song-value'] }}</td>
+            <td class='lock-status-col' data-lock_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_lock' class='glyphicon' aria-hidden="true"></span></td>
         </tr>
 
 
@@ -70,11 +74,12 @@
     <th>Song</th>
     <th>Artist</th>
     <th>Album</th>
-    <th> </th>
-    <th> </th>
+    <th></th>
+    <th></th>
+    <th></th>
 </tr>
 </thead>
-<tbody>
+<tbody class='playlist-table'>
 
     {% for song in req_songs %}
         <tr>
@@ -100,6 +105,7 @@
                 <a id='{{ song["ps_id"] }}_-1' class='user-vote downvote' data-song_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_-1_thumb' class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
             </td>
             <td id='{{ song["ps_id"] }}_total'>{{ song['song-value'] }}</td>
+            <td class='lock-status-col' data-lock_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_lock' class='glyphicon' aria-hidden="true"></span></td>
 
         </tr>
 

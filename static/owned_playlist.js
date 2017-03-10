@@ -79,19 +79,19 @@ function showLockStatus(results) {
         var ps_id = results[i]['ps_id'];
 
         var lock_id = ps_id + '-lock';
-        console.log(lock_id);
+        // console.log(lock_id);
 
         if (lock_status == true) {
             $('#'+lock_id).html('Unlock Song');
             // var lock_li = $('#'+lock_id).parent();
-            console.log(lock_li)
+            // console.log(lock_li)
             // $(newItemLink).data('song_id', song_id)
             var lock_status_word = 'locked'               
         }
         else if (lock_status == false) {
             $('#'+lock_id).html('Lock in Playlist');
             // console.log($('#'+lock_id).parent())
-            console.log(lock_li)
+            // console.log(lock_li)
             lock_status_word = 'unlocked'
 
         }
@@ -167,6 +167,8 @@ function lockSong() {
 
 $('.lock-song').on('click', lockSong);
 
-function sumbitChanges() {}
 
-$('.done-editing').on('click', submitChanges)
+$(document).ready(function(){
+    $('#back-button').tooltip();
+});
+

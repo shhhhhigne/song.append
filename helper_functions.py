@@ -26,14 +26,21 @@ def get_user_groups(user_id):
 
     groups = []
     for users_group in users_groups:
-        if users_group.in_group:
-            group = Group.query.filter_by(group_id=users_group.group_id).one()
+        if users_group.in_group and users_group.group.user_id != user_id:
+            group = users_group.group
             groups.append(group)
         else:
             continue
             # print "not in ", users_group.group_id
 
     return groups
+
+
+def get_user_administered_groups(user_id):
+
+    users_groups = Group.query.filter_by(user_id=user_id).all()
+
+    return users_groups
 
 
 def get_user_owned_playlists(user_id):

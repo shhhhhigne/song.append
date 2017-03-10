@@ -18,13 +18,14 @@ function removeMember() {
     var user_id = $(this).data('user_id');
 
     if ($(this).hasClass('me')) {
-        var questionTitle = 'Are you sure you want to remove yourself?\n';
+        var questionTitle = 'Are you sure you want to remove yourself?';
         var questionStr =  'Once you do only others can add you back and you will';
         questionStr = questionStr + ' no longer have access to playlists shared to this group.';
     }
 
     else {
-        questionStr = 'Are you sure you want to remove this user?';
+        questionTitle = 'Are you sure you want to remove this user?';
+        questionStr = 'If you do linked playlists will be disconnected';
     }
 
     var admin_response = $.confirm({
@@ -75,7 +76,7 @@ function membersAdded(results) {
     $.alert({
             // icon: 'glyphicon glyphicon-thumbs-up',
             title: 'User(s) added',
-            content: results + 'This person and this group are now connected. All playlist connections are in place',
+            content: results + 'and this group are now connected. All playlist connections are in place',
             onClose: function() {
                 location.reload(true);
             }

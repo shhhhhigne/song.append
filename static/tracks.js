@@ -70,3 +70,59 @@ function setAudioState() {
 $('.play-button').on('click', setAudioState);
 // $('')
 
+
+function showLockStatus(results) {
+
+    console.log(results)
+
+
+    for (var i=0; i<results.length; i++) {
+
+        var lock_status = results[i]['lock_status']
+        var ps_id = results[i]['ps_id']
+
+        var lock_id = ps_id + '_lock'
+
+        if (lock_status == true) {
+            $('#'+lock_id).addClass('glyphicon-lock')
+        }
+        if (lock_status == false) {
+            console.log('ho')
+        }
+
+        console.log(lock_status)
+
+        // $('#'+thumb_id).addClass('voted-on')
+
+    }
+
+}
+
+
+checkLockStatus() 
+
+function checkLockStatus() {
+
+    // alert('hey')
+    var ps_ids = []
+    $.each($('.lock-status-col'), function() {
+
+        ps_id = $(this).data('lock_id');
+        // console.log(ps_id)
+
+        ps_ids.push(ps_id);
+
+        
+    });
+
+    ps_data = {'ps_ids': ps_ids};
+
+    $.post('/check-lock-status',
+            ps_data,
+            showLockStatus
+    );
+}
+
+
+
+

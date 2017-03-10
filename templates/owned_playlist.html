@@ -1,34 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Create Playlist{% endblock %}
+{% block title %}Edit Playlist{% endblock %}
+{% block pagetitle %}Edit Playlist{% endblock %}
+
 {% block content %}
 
-<h1 class='current-page' value='edit-playlist'>Edit Playlist</h1>
-<button class='done-editing'>Done<button>
+<h1 class='current-page' value='playlist'>{{ playlist.playlist_name }} <a class='edit-button' href='/playlist/{{playlist.playlist_id }}' data-toggle='tooltip' title='back to user view' data-placement='top'><span class='glyphicon glyphicon-check'></span></a> <a class='edit-button' href='' data-toggle="modal" data-target="#editPlaylistSettings" data-placement='top'><span class='glyphicon glyphicon-cog edit-button'></span></a></h1>
 
-<form method='POST' action='/playlist/{{ playlist.playlist_id }}/edit' id='playlist-name-form'>
-    Playlist Name: <input type='text' name='playlist-name' id='playlist-name' value='{{ playlist.playlist_name }}'>
-    <br>
-    Group: <select class="selectpicker group-selection" name='group-selection'>
-        <option disabled selected value> -- select an option -- </option>
-        {% for users_group in users_groups %}
-            {% if playlist.group_id == users_group.group_id %}
-                <option id='{{ users_group.group_id }}' value='{{ users_group.group_id }}' selected='selected'>{{ users_group.group_name }}</option>
-            {% else %}
-                <option id='{{ users_group.group_id }}' value='{{ users_group.group_id }}''>{{ users_group.group_name }}</option>
-            {% endif %}
-        {% endfor %}
-        </select>
-    <br>
-    Rules: <br>
-        Number of Votes to Add Song: <input type='number' name='num-to-add' id='num-to-add' value='{{ playlist.num_votes_add }}'>
-        <br>
-        Number of Votes to Delete Song: <input type='number' name='num-to-del' id='num-to-del' value='{{ playlist.num_votes_del }}'>
-        <br>
 
-    <input type='submit' name='Submit'>
-</form>
+<div class='playlist-info'>
+
+
+<h5><span class='playlist-data-label'>GROUP:</span> <span class='playlist-data'>{% if group is string %}
+                {{ group }}
+        {% else %}
+            <a href='/group/group.group_id'>{{ group.group_name }}</a>
+        {% endif %}
+        </span>
+</h5>
+<h5><span class='playlist-data-label'>+Value to Add Song:</span> <span class='playlist-data'>{{ playlist.num_votes_add }}</span></h5>
+<h5><span class='playlist-data-label'>-Value to Remove Song:</span> <span class='playlist-data'>{{ playlist.num_votes_del }}</span></h5>
+</div>
+
+
+
+
+
 <br>
-<h3>Tracks</h3>
+<h3>Active Tracks</h3>
 <table class="table table-hover">
 <thead>
 <tr>
@@ -37,6 +35,7 @@
     <th>Artist</th>
     <th>Album</th>
     <th> </th>
+    <th></th>
 </tr>
 </thead>
 <tbody>
@@ -68,6 +67,7 @@
                 </ul> 
                 </span>
             </td>
+            <td class='lock-status-col' data-lock_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_lock' class='glyphicon' aria-hidden="true"></span></td>
         </tr>
 
 
@@ -77,7 +77,7 @@
 </tbody>
 </table>
 <br>
-<h3>Tracks</h3>
+<h3>Requested Tracks</h3>
 <table class="table table-hover">
 <thead>
 <tr>
@@ -86,6 +86,7 @@
     <th>Artist</th>
     <th>Album</th>
     <th> </th>
+    <th></th>
 </tr>
 </thead>
 <tbody>
@@ -118,6 +119,7 @@
                 </ul> 
                 </span>
             </td>
+            <td class='lock-status-col' data-lock_id='{{ song["ps_id"] }}'><span id='{{ song["ps_id"] }}_lock' class='glyphicon' aria-hidden="true"></span></td>
         </tr>
 
 
@@ -126,6 +128,73 @@
 
 </tbody>
 </table>
+
+<div class="modal fade" id="editPlaylistSettings" tabindex="-1" role="dialog" aria-labelledby="editPlaylistSettingsLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPlaylistSettingsLabel">Edit Playlist Settings</h5>
+
+                <div class="modal-body">
+                <form method='POST' action='/playlist/{{ playlist.playlist_id }}/edit' id='playlist-name-form'>
+
+   <!--              <div class="form-group">
+                    <label for="exampleInputEmail1">Playlist Name</label>
+                    <input type='text' class='form-control' name='playlist-name' id='playlist-name' value='{{ playlist.playlist_name }}'>
+                </div> -->
+                <div class='form-box'>
+                    <div class='form-input'>
+                    <input type='text' name='playlist-name' id='playlist-name' value='{{ playlist.playlist_name }}'></input>
+                    </div>
+                    <label class='form-lable'>PLAYLIST NAME</label>
+                </div>
+                <div class='form-box' id='group-picker'>
+                    <div class='form-input'>
+                    <select class="selectpicker group-selection" name='group-selection' title="- - select group to use playlist - -" data-size='auto' data-width='100%'>
+                        <!-- <option disabled selected value> select an option </option> -->
+                        <optgroup label="Administrated Groups">
+                        {% for users_admin_group in user_admin_groups %}
+                            {% if playlist.group_id == users_admin_group.group_id %}
+                                <option id='{{ users_admin_group.group_id }}' value='{{ users_admin_group.group_id }}' selected='selected'>{{ users_admin_group.group_name }}</option>
+                            {% else %}
+                                <option id='{{ users_admin_group.group_id }}' value='{{ users_admin_group.group_id }}''>{{ users_admin_group.group_name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                        <optgroup label="Belonging Groups">
+                        {% for users_group in users_groups %}
+                            {% if playlist.group_id == users_group.group_id %}
+                                <option id='{{ users_group.group_id }}' value='{{ users_group.group_id }}' selected='selected'>{{ users_group.group_name }}</option>
+                            {% else %}
+                                <option id='{{ users_group.group_id }}' value='{{ users_group.group_id }}''>{{ users_group.group_name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    </div>
+                    <label class='form-lable'>GROUP</label>
+                </div>
+                <div class='form-box'>
+                    <div class='form-input'>
+                        <input type='number' name='num-to-add' id='num-to-add' value='{{ playlist.num_votes_add }}'>
+                    </div>
+                        <label class='form-lable'>+VALUE TO ADD</label>
+                </div>
+                <div class='form-box'>
+                    <div class='form-input'>
+                        <input type='number' name='num-to-del' id='num-to-del' value='{{ playlist.num_votes_del }}'>
+                    </div>
+                        <label class='form-lable'>-VALUE TO REMOVE</label>
+                </div>
+                    <input type='submit' name='Submit' value="Save" class='submit'>
+
+                </form>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src='/static/vote.js'></script>
 <script src='/static/tracks.js'></script>
 

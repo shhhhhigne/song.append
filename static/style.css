@@ -1,3 +1,160 @@
+/*tbody {
+    background-color: #FFF9E8;
+}*/
+.nav li a{
+    color: #F45D49 !important;
+}
+body {
+    background-color: #FFF9E8;
+    font-family: 'Raleway', sans-serif;
+}
+
+table a {
+    color: #404A4C;
+}
+
+.playlist-data {
+    color: #404A4C;
+}
+.playlist-data-label {
+    color: #8F909E !important;
+}
+
+.current-page {
+    color: #F45D49;
+    margin-left: 5px;
+}
+
+.user-vote {
+    color: #92BFB1;
+}
+
 .voted-on {
-    color: red;
+    color: #F45D49;
+}
+
+input {
+    background: none;
+    border: 0;
+    
+    /*margin-bottom: 10px;*/
+    /*text-align: center;*/
+    width:100%;
+    /*padding:10px;*/
+    box-sizing:border-box;
+    background:none;
+    outline:none;
+    resize:none;
+    border:0;
+
+/*    font-family:'Montserrat',sans-serif;
+*/  transition:all .3s;
+    border-bottom: 2px solid #8F909E;
+    /*border-bottom:2px solid #bebed2;*/
+}
+
+/*form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+}
+*/
+.form-box {
+    margin-bottom: 10px;
+}
+.modal-dialog {
+  /*height: 80%;*/
+  padding-top:10%;
+}
+
+.modal-content {
+    background: #FFF9E8;
+    border: 3px solid #92BFB1;
+    height: 100%;
+
+}
+
+.submit {
+    border: 2px solid #92BFB1;
+    width: 30%;
+    margin: auto;
+    display: block;
+    color: #92BFB1;
+    margin-top: 15px;
+    margin-bottom: -5px;
+    border-radius: 5px;
+
+}
+
+.submit:hover {
+    background: #92BFB1;
+    color: #FFF9E8;
+}
+
+p:before {
+    content: attr(type);
+    display: block;
+    /*margin:28px 0 0;*/
+    font-size: 14px;
+    color: #404A4C
+}
+
+/*.selectpicker {
+    background: none;
+}*/
+
+#group-picker {
+    margin-top: 20px;
+}
+
+.form-input .btn {
+    flex: 1 1 auto;
+    /*margin: 10px;*/
+    border: 2px solid #8F909E;
+    text-align: center;
+    position: relative;
+    overflow:hidden;
+    transition: .3s;
+    background:#FFF9E8;
+    box-shadow:none;
+}
+
+.edit-button {
+    font-size: 16pt;
+    color: #8F909E;
+}
+
+.playlist-info {
+    margin-left: 20px;
+}
+
+.navbar-brand {
+    color: #92BFB1 !important;
+}
+
+.navbar-custom {
+    background-color: #D4DBE3 !important;
+}
+
+.page-title {
+    padding-bottom: 0;
+    padding-left: 10px;
+    color: #8F909E;
+}
+
+.lock-status-col {
+    color: #F45D49;    
+}
+
+.user-info-form {
+    /*margin: 50%;*/
+    border: 2px solid #8F909E;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+#add-member-button {
+    font-size: 20pt !important;
+    color: #92BFB1 !important;
 }

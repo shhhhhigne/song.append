@@ -52,7 +52,11 @@ function userVoted(results) {
         $.alert({
             // icon: 'glyphicon glyphicon-thumbs-up',
             title: 'Your vote is now changed to ' + alertThumb,
-            content: "It's ok to change your mind"
+            content: "It's ok to change your mind",
+            onClose: function() {
+                location.reload(true);
+
+            }
         });
         $('#'+alt_thumb_id).removeClass('voted-on');
 
@@ -61,17 +65,17 @@ function userVoted(results) {
         $.alert({
             // icon: 'glyphicon glyphicon-thumbs-up',
             title: 'Your gave a vote of ' + alertThumb,
-            content: 'Thank you, your opinion is noted'
+            content: 'Thank you, your opinion is noted',
+            onClose: function() {
+                location.reload(true);
+            }
         });
     }
     $('#'+thumb_id).addClass('voted-on');
     console.log(results['vote_total'])
     $('#'+vote_total_id).text(results['vote_total']);
 
-    if (results['song_status_changed'] == true) {
-        // alert('hey')
-        location.reload(true);
-    }
+    
 
 }
 
@@ -107,7 +111,7 @@ function showUserVotes(results) {
         var ps_id = results[i]['ps_id']
 
         var thumb_id = ps_id + '_' + vote_value + '_thumb'
-        console.log(thumb_id)
+        // console.log(thumb_id)
 
 
         $('#'+thumb_id).addClass('voted-on')
@@ -139,6 +143,11 @@ function checkUserVotes() {
             showUserVotes
     );
 }
+
+
+
+
+
 
 
 

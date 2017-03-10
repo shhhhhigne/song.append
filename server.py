@@ -28,7 +28,8 @@ from helper_functions import (get_user_groups,
                               get_playlist_data,
                               get_group_data,
                               remove_song_fully,
-                              move_song_req_to_act)
+                              move_song_req_to_act,
+                              get_user_administered_groups)
 
 
 app = Flask(__name__)
@@ -70,8 +71,8 @@ def register_process():
     email = request.form.get('email')
     username = request.form.get('username')
     password = request.form.get('password')
-    fname = request.form.get('fname')
-    lname = request.form.get('lname')
+    fname = request.form.get('fname').title()
+    lname = request.form.get('lname').title()
 
     try:
         user_object = User.query.filter_by(email=email).one()
@@ -129,7 +130,7 @@ def sign_in_process():
     password = request.form.get('password')
 
     try:
-        user_object = User.query.filter_by(email=username).one()
+        user_object = User.query.filter_by(username=username).one()
         if password == user_object.password:
             pass   # login -- for clairty in code
         else:
@@ -137,18 +138,28 @@ def sign_in_process():
             return redirect('/sign-in')
 
     except sqlalchemy.orm.exc.NoResultFound:
-        flash("Email not found, please try again or create a new account")
-        return redirect('/sign-in')
+        try:
+            user_object = User.query.filter_by(email=username).one()
+            if password == user_object.password:
+                pass   # login -- for clairty in code
+            else:
+                flash("Wrong Password")
+                return redirect('/sign-in')
+
+        except sqlalchemy.orm.exc.NoResultFound:
+
+            flash("User not found, please try again or create a new account")
+            return redirect('/sign-in')
 
     user_id = user_object.user_id
     session['user_id'] = user_id
     session['logged_in'] = True
     session['email'] = user_object.email
-    session['username'] = user_object.email
+    session['username'] = user_object.username
 
     print(session)
     flash("Logged In")
-    return redirect("/user-page/" + str(user_id))
+    return redirect("/")
 
 
 @app.route('/logout')
@@ -184,9 +195,11 @@ def show_create_playlist_form():
     user_id = session['user_id']
 
     groups = get_user_groups(user_id)
+    admin_groups = get_user_administered_groups(user_id)
 
     return render_template('create_playlist.html',
                             groups=groups,
+                            admin_groups=admin_groups,
                             playlist_exists=False)
 
 @app.route('/create-playlist', methods=['POST'])
@@ -204,7 +217,7 @@ def create_playlist_form():
 
     user_id = session['user_id']
 
-    group_id = request.form.get('group')
+    group_id = request.form.get('group-selection')
 
     num_to_add = request.form.get('num-to-add') or None
     num_to_del = request.form.get('num-to-del') or None
@@ -267,16 +280,17 @@ def add_song_to_playlist(song_id, playlist_id):
         playlist_song_object = PlaylistSong.query.filter_by(song_id=song_id).filter_by(playlist_id=playlist_id).one()
 
         current_status = playlist_song_object.status
+        current_lock = playlist_song_object.immutable
 
         # if override:
         #     playlist_song_object.status = 'active'
         # if lock:
         #     playlist_song_object.immutable = True
 
-        if override is True:
-            playlist_song_object.status = 'active'
-        if lock is True:
-            playlist_object.immutable = True
+        if current_status == 'requested':
+            playlist_song_object.status = status
+        if current_lock == False:
+            playlist_object.immutable = immutable
 
         db.session.commit()
 
@@ -423,6 +437,7 @@ def edit_playlist_form(playlist_id):
     user_object = User.query.filter_by(user_id=playlist.user_id).one()
 
     users_groups = get_user_groups(user_id)
+    user_admin_groups = get_user_administered_groups(user_id)
     # groups = Group.query.filter_by.all()
 
     if group_id == None:
@@ -440,6 +455,7 @@ def edit_playlist_form(playlist_id):
                            songs=songs,
                            req_songs=req_songs,
                            users_groups=users_groups,
+                           user_admin_groups=user_admin_groups,
                            group=group)
 
 
@@ -688,13 +704,12 @@ def show_group_page(group_id):
 def show_user_admin_groups():
     user_id = session['user_id']
 
-    groups = get_user_groups(user_id)
+    groups = get_user_administered_groups(user_id)
 
     user_groups = {}
 
     for group in groups:
-        if group.user_id == user_id:
-            user_groups[group.group_id] = group.group_name
+        user_groups[group.group_id] = group.group_name
 
     return jsonify(user_groups)
 
@@ -709,8 +724,7 @@ def show_user_belonging_groups():
     user_groups = {}
 
     for group in groups:
-        if group.user_id != user_id:
-            user_groups[group.group_id] = group.group_name
+        user_groups[group.group_id] = group.group_name
 
     return jsonify(user_groups)
 
@@ -909,6 +923,26 @@ def get_current_user_votes():
 
     return jsonify(votes)
 
+@app.route('/check-lock-status', methods=['POST'])
+def get_song_lock_status():
+
+    ps_ids = request.form.getlist('ps_ids[]')
+
+    locks = []
+
+    for ps_id in ps_ids:
+        ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
+        print ps_object
+
+        lock_status = {'ps_id': ps_id,
+                       'lock_status': ps_object.immutable}
+
+        locks.append(lock_status)
+
+    return jsonify(locks)
+
+
+
 
 
 
@@ -936,7 +970,7 @@ def get_current_user_votes():
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    app.debug = True
+    app.debug = False
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
     app.config['SQLALCHEMY_ECHO'] = False
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode

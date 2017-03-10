@@ -1,29 +1,58 @@
 {% extends 'base.html' %}
 {% block title %}Create Playlist{% endblock %}
+{% block pagetitle %}New Playlist{% endblock %}
 {% block content %}
+
+
+<span class='row'>
+<span class='col-sm-2'></span>
+<span class='col-sm-8 user-info-form'>
 
 <h1 class='current-page' value='create-playlist'>Create Playlist</h1>
 
 <form method='POST' action='/create-playlist' id='playlist-name-form'>
-    Playlist Name: <input type='text' name='playlist-name' id='playlist-name'>
-    <br>
-    Group: <select name='group' class='dropdown'>
+    <div class='form-box'>
+        <div class='form-input'>
+            <input type='text' name='playlist-name' id='playlist-name'>
+        </div>
+    PLAYLIST NAME
+    </div>
+    <div class='form-box'>
+        <div class='form-input' id='group-picker'>
+        <select class="selectpicker group-selection" name='group-selection' title="- - select group to use playlist - -" data-size='auto' data-width='100%'>
+            <!-- <option disabled selected value> select an option </option> -->
+            <optgroup label="Administrated Groups">
+            {% for admin_group in admin_groups %}
+                <option id='{{ admin_group.group_id }}' value='{{ admin_group.group_id }}''>{{ admin_group.group_name }}</option>
+            {% endfor %}
+            </optgroup>
+            <optgroup label="Belonging Groups">
+            {% for group in groups %}
+                <option id='{{ group.group_id }}' value='{{ group.group_id }}'>{{ group.group_name }}</option>
+            {% endfor %}
+            </optgroup>
+        </select>
+        </div>
+        <label class='form-lable'>GROUP</label>
+    </div>
+    <!-- Group: <select name='group' class='dropdown'>
         {% for group in groups %}
             <option id='{{ group.group_id }}' value='{{ group.group_id }}''>{{ group.group_name }}</option>
         {% endfor %}
-        </select>
-    <br>
-    Rules: <br>
-        Number of Votes to Add Song: <input type='number' name='num-to-add' id='num-to-add' placeholder="3">
-        <br>
-        Number of Votes to Delete Song: <input type='number' name='num-to-del' id='num-to-del' placeholder="3">
-        <br>
-    Songs: <br>
-        Add Song ----Button, complete
-        List of songs ----list, complete
-            
-    <input type='submit' name='Submit'>
+        </select> -->
+    <div class='form-box'>
+        <input type='number' name='num-to-add' id='num-to-add' placeholder="3">+VALUE TO ADD
+    </div>
+    <div class='form-box'>
+        <input type='number' name='num-to-del' id='num-to-del' placeholder="3">-VALUE TO REMOVE
+    </div>
+    <input type='submit' name='Submit' class='submit'>
 </form>
+
+</span>
+</span>
+
+
 
 
 

@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Edit Group{% endblock %}
+{% block pagetitle %}Edit Group{% endblock %}
 {% block content %}
 
 <h1 class='current-page' value='edit_group'>{{group.group_name}}</h1>
 
-<h5>Group Admin: </h5>
+<h5  class='playlist-info'><span class='playlist-data-label'>Group Admin:</span> 
 <a href='/users/{{ admin["admin_id"] }}'><h7>{{ admin['name']}}({{ admin['username']}})</h7></a>
-<br>
-<h5>Group Members:</h5>
-<br>
+</h5>
+<h3>Group Members:</h3>
 
 <table class="table table-hover">
 <thead>
@@ -26,7 +26,7 @@
             </td>
             <td>
                 <span class="dropdown">
-                <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="member-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                <span class="glyphicon glyphicon-option-horizontal dropdown-toggle" id="member-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
                 <ul class="dropdown-menu dropdown-menu-right track-playlist-dropdown" aria-labelledby="member-dropdown">
                     <li>
                         <a id='{{ member.user.user_id }}-remove' class='remove_member' data-user_id='{{ member.user.user_id }}' data-group_id='{{ group.group_id }}'>
@@ -50,13 +50,15 @@
 </tbody>
 </table>
 <form id='{{ group.group_id }}-add_form'>
-<select id='{{ group.group_id }}-add' class="selectpicker" multiple data-live-search="true" data-group_id='{{ group.group_id }}'>
+<span class='form-input'>
+<select id='{{ group.group_id }}-add' class="selectpicker member-selection" name='member-selection' multiple title="- - select members to add to group- -" data-size='auto' data-width='95%' multiple data-live-search="true" data-group_id='{{ group.group_id }}'>
 {% for member in non_members %}
     <option value='{{ member.user.user_id }}' data-group_id='{{ group.group_id }}'>{{ member.user.fname }} {{ member.user.lname }}({{ member.user.username }})</option>
 {% endfor %}
 </select>
+</span>
 <!-- <button  class="btn btn-primary add_member">
- --><span class='glyphicon glyphicon-plus-sign add_member' type="submit" data-group_id='{{ group.group_id }}'></span>
+ --><span id='add-member-button' class='glyphicon glyphicon-plus-sign add_member' type="submit" data-group_id='{{ group.group_id }}'></span>
 <!-- </button> -->
 </form>
 

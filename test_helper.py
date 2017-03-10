@@ -29,7 +29,8 @@ from helper_functions import (get_user_groups,
                               move_song_req_to_act,
                               readd_song_to_req,
                               remove_song_helper,
-                              add_song_helper)
+                              add_song_helper,
+                              get_user_administered_groups)
 
 from test_data import create_test_data
 
@@ -43,6 +44,7 @@ class BasicTests(TestCase):
         def setUp(cls):
             """Stuff to do once before running all tests."""
 
+            
             # Connect to test database
             connect_to_db(app, "postgresql:///test_collabplaylists")
 
@@ -59,4 +61,34 @@ class BasicTests(TestCase):
             db.session.close()
             db.drop_all()
 
-            
+
+        def test_get_user_administered_groups(self, user_id):
+
+            groups = get_user_administered_groups(user_id)
+
+            for group in groups:
+                assert group.group_id == user_id
+
+
+        def test_get_user_owned_playlists(self, user_id):
+
+            playlists = get_user_owned_playlists(user_id)
+
+            for playist in playlists:
+                assert playlist.playlist_id == user_id
+
+
+        # def test_get_song_data(self):
+
+        #     song_id = 1
+
+        #     song_data = get_song_data(song_id)
+
+        #     song_artist = SongArtist.query.filter_by(song_id=song_id).all()
+
+
+
+        #     assert song_data = {'song': song,
+        #                         'artists': }
+
+
