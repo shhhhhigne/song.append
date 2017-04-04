@@ -337,7 +337,7 @@ def readd_song_to_req(ps_object):
 
 def remove_song_fully(ps_object):
 
-    print ps_object
+    # print ps_object
 
     song_spotify_id = ps_object.song.song_spotify_id
     playlist_object = ps_object.playlist

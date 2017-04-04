@@ -4,27 +4,26 @@
 
 {% block content %}
 
-<h2 class='current-page' value='results'>Results</h2>
+<h2 class='current-page' value='album-info'>{{ album_data["album_name"] }}</h2>
+<div class='playlist-info'>
+<h5><span class='playlist-data-label'>By:</span> <span class='playlist-data'>{% for artist in album_data["artists"] %} <a href='artist/{{ artist["artist_id"] }}'>{{ artist["artist_name"] }}</a> {% endfor %} </span></h5>
+</div>
 
 
-{% for key,value in results.items() %}
-    {% if key == 'tracks' %}
-        {% if value == None %}
-        <h2>No results Found</h2>
-        {% else %}
-        <h3>Tracks</h3>
-        <table class="table table-hover" id='search-table'>
-        <thead>
-        <tr>
-            <th> </th>
-            <th>Song</th>
-            <th>Artist</th>
-            <th>Album</th>
-            <th> </th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for id,item in value.items() %}
+<h3>Tracks</h3>
+<table class="table table-hover">
+<thead>
+<tr>
+    <th> </th>
+    <th>Song</th>
+    <th>Artist</th>
+    <th> </th>
+</tr>
+</thead>
+<tbody>
+
+    {% for id,item in track_results.items() %}
+        
             <tr>
                 <td>
                     <span class="dropdown">
@@ -42,7 +41,6 @@
                         , <a href='artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
                     {% endfor %}
                 </td>
-                <td><a href='album-info/{{ item["album_id"] }}'>{{ item['album_name'] }}</a></td>
                 <td>
                     <span class="dropdown">
                     <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="playlist-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
@@ -55,23 +53,17 @@
                 </td>
             </tr>
 
-        {% endfor %}
-        </tbody>
-        </table>
-        {% endif %}
-    {% endif %}
+    {% endfor %}
+    </tbody>
+    </table>
 
-{% endfor %}
 
-<div id='more'><a id='load-more' data-offset='10' data-user_input='{{ user_input }}'>Load more results</a></div>
-<br>
 
 <script type=text/javascript>
     var currentUser = {{ session['user_id']|tojson|safe }}; 
 </script> 
 
 <script src='/static/add_tracks.js'></script>
-<script src='/static/load_more.js'></script>
 {% endblock %}
 
 {% block javascript %}tracks{% endblock %}

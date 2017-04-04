@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 
 from add_to_db_helper import add_song_to_db, add_artist_to_db
 
+from model import Album
+
 SPOTIPY_CLIENT = spotipy.oauth2.SpotifyOAuth(os.environ.get('SPOTIPY_CLIENT_ID'),
                                              os.environ.get('SPOTIPY_CLIENT_SECRET'),
                                              os.environ.get('SPOTIPY_REDIRECT_URI'))
@@ -57,7 +59,7 @@ def create_playlist(playlist_name):
     sp = spotipy.Spotify(auth=token)
     playlist = sp.user_playlist_create(username, playlist_name)
 
-    print 'playlist id: ' + playlist['name'], playlist['id']
+    # print 'playlist id: ' + playlist['name'], playlist['id']
     return playlist['id']
 
 
@@ -115,9 +117,9 @@ def remove_song_from_spotify_playlist(song_id, playlist_id):
     token = get_token()
 
     sp = spotipy.Spotify(auth=token)
-    print song_id
+    # print song_id
     results = sp.user_playlist_remove_all_occurrences_of_tracks(username, str(playlist_id), song_id)
-    print  '#######', results
+    # print  '#######', results
 
 
 def get_playlist_info(playlist_id):
@@ -131,8 +133,94 @@ def get_artist_info(artist_id):
     #TODO: get artist info
     pass
 
+def get_artists(item):
+    artists = []
+    for artist in item['artists']:
+        artist_info = {'artist_spotify_id': artist['id'],
+                       'artist_name': artist['name'],
+                       'artist_url': artist['external_urls']['spotify']}
 
-def get_album_info(album_id):
+
+        artist_info['artist_id'] = add_artist_to_db(artist_info)
+
+
+        artists.append(artist_info)
+
+    return artists
+
+
+def get_album_info(album_spotify_id):
+
+    spotify = spotipy.Spotify()
+
+    album_info = spotify.album(album_spotify_id)
+
+    album_data = {'album_name': album_info['name'],
+                  'album_spotify_id': album_spotify_id,
+                  'album_url': album_info['external_urls']['spotify']}
+
+    album_artists = get_artists(album_info)
+
+    album_data['artists'] = album_artists
+
+
+    track_results = {}
+
+    tracks = album_info['tracks']
+    track_items = tracks['items']
+
+    for item in track_items:
+
+        artists = get_artists(item)        
+        # artists = []
+        # for artist in item['artists']:
+        #     artist_info = {'artist_spotify_id': artist['id'],
+        #                    'artist_name': artist['name'],
+        #                    'artist_url': artist['external_urls']['spotify']}
+
+
+        #     artist_info['artist_id'] = add_artist_to_db(artist_info)
+
+
+        #     artists.append(artist_info)
+
+
+        track_info = {'spotify_id': item['id'],
+                      'name': item['name'],
+                      'preview': item['preview_url'],
+                      'spotify_url': item['external_urls']['spotify'],
+                      'artists': artists,
+                      'spotify_album_id': album_spotify_id,
+                      'album_name': album_info['name'],
+                      'album_url': album_info['external_urls']['spotify']
+        }
+
+        ids = add_song_to_db(track_info)
+        track_info['id'] = ids['song_id']
+        track_info['album_id'] = ids['album_id']
+        track_results[track_info['id']] = track_info
+
+    album_data['album_id'] = Album.query.filter_by(album_spotify_id=album_spotify_id).one().album_id
+
+    all_results = {'album_data': album_data,
+                   'track_results': track_results
+    }
+
+    return all_results
+
+
+
+    #     # print '*******************tracks', tracks
+    #     track_info = get_track_info(item)
+    #     # print track_info
+    #     tracks[track_info['id']] = track_info
+
+    # all_results['tracks'] = tracks
+
+    # return all_results
+
+
+
 
     # album_id = {}
     # if len(album_items) > 0:
@@ -145,7 +233,7 @@ def get_album_info(album_id):
     #                 'name': }
 
     #TODO: get album info
-    pass
+    
 
 
 
@@ -183,7 +271,7 @@ def get_track_info(item):
 
 
 
-def search(user_input):
+def search(user_input, offset=0):
 
     spotify = spotipy.Spotify()
 
@@ -199,7 +287,7 @@ def search(user_input):
 
    
 
-    track_results = spotify.search(q=user_input, type='track')
+    track_results = spotify.search(q=user_input, offset=offset, type='track')
     track_items = track_results['tracks']['items']
     tracks = {}
 

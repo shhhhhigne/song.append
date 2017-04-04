@@ -35,7 +35,7 @@ class Group(db.Model):
     __tablename__ = 'groups'
 
     group_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    group_name = db.Column(db.String(64), nullable=False)\
+    group_name = db.Column(db.String(64), nullable=False)
 
     # This is the group owner
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)

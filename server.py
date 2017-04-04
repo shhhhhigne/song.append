@@ -15,7 +15,7 @@ from model import User, Group, UserGroup, Playlist, PlaylistSong, Vote
 from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists, search
-from spotipy_functions import add_song_to_spotify_playlist, change_playlist_name
+from spotipy_functions import add_song_to_spotify_playlist, change_playlist_name, get_album_info
 
 from helper_functions import (get_user_groups,
                               get_user_owned_playlists, 
@@ -103,7 +103,7 @@ def register_process():
     session['logged_in'] = True
     session['email'] = user_object.email
     session['username'] = user_object.username
-    print(session)
+    # print(session)
     flash("Logged In")
 
     for group in Group.query.all():
@@ -157,7 +157,7 @@ def sign_in_process():
     session['email'] = user_object.email
     session['username'] = user_object.username
 
-    print(session)
+    # print(session)
     flash("Logged In")
     return redirect("/")
 
@@ -481,7 +481,7 @@ def edit_playlist(playlist_id):
 
         playlist_object.playlist_name = name
 
-    print(request.form)
+    # print(request.form)
 
     group_id = request.form.get('group-selection')
     if playlist_object.group_id != group_id:
@@ -646,7 +646,7 @@ def create_group():
     for user in User.query.all():
         try:
             UserGroup.query.filter_by(user_id=user.user_id).filter_by(group_id=group_id).one()
-            print 'heyyyyyyyyyyyyyyyy'
+            # print 'heyyyyyyyyyyyyyyyy'
         except sqlalchemy.orm.exc.NoResultFound:
             user_group_object = UserGroup(group_id=group_id,
                                           user_id=user.user_id)
@@ -666,7 +666,7 @@ def edit_group(group_id):
 
     group_query = UserGroup.query.filter_by(group_id=group_id)
     non_members = group_query.filter_by(in_group=False).all()
-    print 'non members:', non_members
+    # print 'non members:', non_members
 
 
     if not group_data['is_admin']:
@@ -879,7 +879,19 @@ def show_search_results():
     results = search(user_input)
 
     return render_template('search_results.html',
+                           user_input=user_input,
                            results=results)
+
+
+@app.route('/load-more-results', methods=['GET'])
+def load_more_results():
+
+    offset = request.args.get('offset')
+    user_input = request.args.get('user_input')
+
+    results = search(user_input, offset)
+
+    return jsonify(results)
 
 
 @app.route('/register-user-vote', methods=['POST'])
@@ -932,7 +944,7 @@ def get_song_lock_status():
 
     for ps_id in ps_ids:
         ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
-        print ps_object
+        # print ps_object
 
         lock_status = {'ps_id': ps_id,
                        'lock_status': ps_object.immutable}
@@ -940,6 +952,47 @@ def get_song_lock_status():
         locks.append(lock_status)
 
     return jsonify(locks)
+
+
+@app.route('/track-info/<track_id>', methods=['GET'])
+def get_track_info():
+
+    song_id = request.form.get('song_id')
+
+
+
+    song_spotify_id = request.form.get('song_spotify_id')
+
+    return
+
+
+@app.route('/album-info/<album_id>', methods=['GET'])
+def get_album_data(album_id):
+
+    # is_researched = Album.query.filter_by(album_id=album_id).one()
+
+    # if is_researched == False:
+    album_object = Album.query.filter_by(album_id=album_id).one()
+    album_spotify_id = album_object.album_spotify_id
+    album_info = get_album_info(album_spotify_id)
+
+    track_results = album_info['track_results']
+    album_data = album_info['album_data']
+    # album_id = album_info['album_id']
+
+    # album_info = Album.query.filter_by(album_id=)
+
+
+    return render_template('album_info.html',
+                           track_results=track_results,
+                           album_data=album_data)
+
+    # else:
+    #     album_songs = Song.query.filter_by(album_id=album_id).all()
+
+
+
+
 
 
 
@@ -970,7 +1023,7 @@ def get_song_lock_status():
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    app.debug = False
+    app.debug = True
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
     app.config['SQLALCHEMY_ECHO'] = False
     app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode

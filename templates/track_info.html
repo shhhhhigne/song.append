@@ -13,7 +13,7 @@
         <h2>No results Found</h2>
         {% else %}
         <h3>Tracks</h3>
-        <table class="table table-hover" id='search-table'>
+        <table class="table table-hover">
         <thead>
         <tr>
             <th> </th>
@@ -42,7 +42,7 @@
                         , <a href='artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
                     {% endfor %}
                 </td>
-                <td><a href='album-info/{{ item["album_id"] }}'>{{ item['album_name'] }}</a></td>
+                <td><a href='track/{{ item["album_id"] }}'>{{ item['album_name'] }}</a></td>
                 <td>
                     <span class="dropdown">
                     <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="playlist-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
@@ -63,15 +63,11 @@
 
 {% endfor %}
 
-<div id='more'><a id='load-more' data-offset='10' data-user_input='{{ user_input }}'>Load more results</a></div>
-<br>
-
 <script type=text/javascript>
     var currentUser = {{ session['user_id']|tojson|safe }}; 
 </script> 
 
 <script src='/static/add_tracks.js'></script>
-<script src='/static/load_more.js'></script>
 {% endblock %}
 
 {% block javascript %}tracks{% endblock %}
