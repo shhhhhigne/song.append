@@ -16,6 +16,7 @@ from model import connect_to_db, db
 
 from spotipy_functions import initialize_auth, create_playlist, show_all_playlists, search
 from spotipy_functions import add_song_to_spotify_playlist, change_playlist_name, get_album_info
+from spotipy_functions import get_artist_info
 
 from helper_functions import (get_user_groups,
                               get_user_owned_playlists, 
@@ -874,6 +875,10 @@ def make_member_admin():
 @app.route('/search', methods=['GET'])
 def show_search_results():
 
+    if not session.get('user_id'):
+        flash('please sign in to search')
+        return redirect('/sign-in')
+
     user_input = request.args.get('search-str')
 
     results = search(user_input)
@@ -974,10 +979,11 @@ def get_album_data(album_id):
     # if is_researched == False:
     album_object = Album.query.filter_by(album_id=album_id).one()
     album_spotify_id = album_object.album_spotify_id
-    album_info = get_album_info(album_spotify_id)
+    album_info = get_album_info([album_spotify_id])
 
-    track_results = album_info['track_results']
-    album_data = album_info['album_data']
+
+    track_results = album_info[0]['track_results']
+    album_data = album_info[0]['album_data']
     # album_id = album_info['album_id']
 
     # album_info = Album.query.filter_by(album_id=)
@@ -990,6 +996,20 @@ def get_album_data(album_id):
     # else:
     #     album_songs = Song.query.filter_by(album_id=album_id).all()
 
+@app.route('/artist-info/<artist_id>', methods=['GET'])
+def get_artist_data(artist_id):
+
+    artist_object = Artist.query.filter_by(artist_id=artist_id).one()
+    artist_spotify_id = artist_object.artist_spotify_id
+    artist_info = get_artist_info(artist_spotify_id)
+
+    artist_data = artist_info['artist_data']
+    album_data = artist_info['album_data']
+    
+
+    return render_template('artist_info.html',
+                           artist_data=artist_data,
+                           album_data=album_data)
 
 
 

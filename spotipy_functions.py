@@ -128,14 +128,35 @@ def get_playlist_info(playlist_id):
     pass
 
 
-def get_artist_info(artist_id):
+def get_artist_info(artist_spotify_id):
 
     #TODO: get artist info
-    pass
+    spotify = spotipy.Spotify()
 
-def get_artists(item):
+    artist_albums = spotify.artist_albums(artist_spotify_id)
+
+    album_ids = []
+
+    for album in artist_albums['items']:
+        album_ids.append(album['id'])
+
+    full_artist_info = spotify.artist(artist_spotify_id)
+
+    print '------'
+    print full_artist_info
+    print '--------'
+    print type(full_artist_info)
+
+    all_results = {'album_data': get_album_info(album_ids),
+                   'artist_data': get_artists([full_artist_info])
+    }
+
+    return all_results
+
+
+def get_artists(all_artists):
     artists = []
-    for artist in item['artists']:
+    for artist in all_artists:
         artist_info = {'artist_spotify_id': artist['id'],
                        'artist_name': artist['name'],
                        'artist_url': artist['external_urls']['spotify']}
@@ -149,109 +170,96 @@ def get_artists(item):
     return artists
 
 
-def get_album_info(album_spotify_id):
+# def get_album_test(album_spotify_ids):
+
+#     spotify = spotipy.Spotify()
+
+#     albums = spotify.albums(album_spotify_ids)
+
+#     for album in albums['albums']:
+#         return type(album)
+
+#     return albums
+
+
+
+def get_album_info(album_spotify_ids):
 
     spotify = spotipy.Spotify()
 
-    album_info = spotify.album(album_spotify_id)
+    all_results = []
 
-    album_data = {'album_name': album_info['name'],
-                  'album_spotify_id': album_spotify_id,
-                  'album_url': album_info['external_urls']['spotify']}
+    albums = spotify.albums(album_spotify_ids)
 
-    album_artists = get_artists(album_info)
+    for album_info in albums['albums']:
 
-    album_data['artists'] = album_artists
+        album_spotify_id = album_info['id']
 
+        album_data = {'album_name': album_info['name'],
+                      'album_spotify_id': album_spotify_id,
+                      'album_url': album_info['external_urls']['spotify']}
 
-    track_results = {}
+        album_artists = get_artists(album_info['artists'])
 
-    tracks = album_info['tracks']
-    track_items = tracks['items']
-
-    for item in track_items:
-
-        artists = get_artists(item)        
-        # artists = []
-        # for artist in item['artists']:
-        #     artist_info = {'artist_spotify_id': artist['id'],
-        #                    'artist_name': artist['name'],
-        #                    'artist_url': artist['external_urls']['spotify']}
+        album_data['artists'] = album_artists
 
 
-        #     artist_info['artist_id'] = add_artist_to_db(artist_info)
+        track_results = {}
+
+        tracks = album_info['tracks']
+        track_items = tracks['items']
+
+        for item in track_items:
+
+            # artists = get_artists(item['artists'])        
+
+            # track_info = {'spotify_id': item['id'],
+            #               'name': item['name'],
+            #               'preview': item['preview_url'],
+            #               'spotify_url': item['external_urls']['spotify'],
+            #               'artists': artists,
+            #               'spotify_album_id': album_spotify_id,
+            #               'album_name': album_info['name'],
+            #               'album_url': album_info['external_urls']['spotify']
+            # }
+
+            # ids = add_song_to_db(track_info)
+            # track_info['id'] = ids['song_id']
+            # track_info['album_id'] = ids['album_id']
+
+            track_info = get_track_info(item)
 
 
-        #     artists.append(artist_info)
+            track_results[track_info['id']] = track_info
 
+        album_data['album_id'] = Album.query.filter_by(album_spotify_id=album_spotify_id).one().album_id
 
-        track_info = {'spotify_id': item['id'],
-                      'name': item['name'],
-                      'preview': item['preview_url'],
-                      'spotify_url': item['external_urls']['spotify'],
-                      'artists': artists,
-                      'spotify_album_id': album_spotify_id,
-                      'album_name': album_info['name'],
-                      'album_url': album_info['external_urls']['spotify']
+        all_album_results = {'album_data': album_data,
+                             'track_results': track_results
         }
 
-        ids = add_song_to_db(track_info)
-        track_info['id'] = ids['song_id']
-        track_info['album_id'] = ids['album_id']
-        track_results[track_info['id']] = track_info
-
-    album_data['album_id'] = Album.query.filter_by(album_spotify_id=album_spotify_id).one().album_id
-
-    all_results = {'album_data': album_data,
-                   'track_results': track_results
-    }
+        all_results.append(all_album_results)
 
     return all_results
-
-
-
-    #     # print '*******************tracks', tracks
-    #     track_info = get_track_info(item)
-    #     # print track_info
-    #     tracks[track_info['id']] = track_info
-
-    # all_results['tracks'] = tracks
-
-    # return all_results
-
-
-
-
-    # album_id = {}
-    # if len(album_items) > 0:
-    #       for item in album_items:
-    #           albums[item['id']] = item['name']
-
-    #       all_results['albums'] = albums
-
-    #   album_info = {'id': album_id,
-    #                 'name': }
-
-    #TODO: get album info
-    
-
 
 
 
 
 def get_track_info(item):
 
-    artists = []
-    for artist in item['artists']:
-        artist_info = {'artist_spotify_id': artist['id'],
-                       'artist_name': artist['name'],
-                       'artist_url': artist['external_urls']['spotify']}
+    # artists = []
+    # for artist in item['artists']:
+    #     artist_info = {'artist_spotify_id': artist['id'],
+    #                    'artist_name': artist['name'],
+    #                    'artist_url': artist['external_urls']['spotify']}
 
 
-        artist_info['artist_id'] = add_artist_to_db(artist_info)
+    #     artist_info['artist_id'] = add_artist_to_db(artist_info)
 
 
-        artists.append(artist_info)
+    #     artists.append(artist_info)
+
+    artists = get_artists(item['artists'])
 
 
     track_info = {'spotify_id': item['id'],
@@ -295,7 +303,6 @@ def search(user_input, offset=0):
         for item in track_items:
             # print '*******************tracks', tracks
             track_info = get_track_info(item)
-            # print track_info
             tracks[track_info['id']] = track_info
 
         all_results['tracks'] = tracks

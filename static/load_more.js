@@ -11,9 +11,10 @@ function showMore(results) {
 
     for (var song_id in tracks) {
         var song = tracks[song_id]
-        var artist_info = `<a href='artist/` + song['artists'][0]['artist_id'] + `'>` + song['artists'][0]['artist_name'] + `</a>`
-        for (var artist in song['artists'].slice(1)) {
-            artist_info = artist_info + `, <a href='artist/` + artist['artist_id'] + `'>` + artist['artist_name'] + `</a>`
+        var artist_info = `<a href='artist-info/` + song['artists'][0]['artist_id'] + `'>` + song['artists'][0]['artist_name'] + `</a>`
+        for (var i=1; i < song['artists'].length; i++) {
+            console.log(song['artists'][i]['artist_id'])
+            artist_info = artist_info + `, <a href='artist-info/` + song['artists'][i]['artist_id'] + `'>` + song['artists'][i]['artist_name'] + `</a>`
 
         }
 

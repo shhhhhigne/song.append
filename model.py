@@ -139,8 +139,8 @@ class Song(db.Model):
 
     # So I can check if the song is already in my database
     song_spotify_id = db.Column(db.String(300), nullable=False, unique=True)
-    # Used to find the 30 second preview of the song
-    preview_url = db.Column(db.String(300), nullable=False)
+    # Used to find the 30 second preview of the song -- not all songs have a preview url
+    preview_url = db.Column(db.String(300), nullable=True)
     # Used to find the song in the spotify database
     spotify_url = db.Column(db.String(300), nullable=False, unique=True)
 
