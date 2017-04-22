@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Artist Info{% endblock %}
+{% block pagetitle %}Artist Info{% endblock %}
+
+{% block content %}
+
+<h2 class='current-page' value='artist-info'>{{ artist_data["artist_name"] }}</h2>
+
+{% for album in album_data %}
+<h3>{{ album["album_name"] }}</h3>
+<table class="table table-hover">
+<thead>
+<tr>
+    <th> </th>
+    <th>Song</th>
+    <th>Artist</th>
+    <th> </th>
+</tr>
+</thead>
+<tbody>
+
+    {% for id,item in track_results.items() %}
+        
+            <tr>
+                <td>
+                    <span class="dropdown">
+                    <span class="glyphicon glyphicon-play-circle dropdown-toggle playDropdown" id="{{ id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                    <ul class="dropdown-menu" aria-labelledby="playDropdown">
+                        <li id="{{ id }}-preview" class='play-button' data-tooltip="{{ item['preview'] }}"><a>Play 30 sec Preview</a></li>
+                        <li><a href="#">Play Full Song on Spotify</a></li>
+                    </ul> 
+                    </span>
+                </td>
+                <td><a href='track/{{ id }}'>{{ item['name'] }} </a></td>
+                <td>
+                    <a href='artist/{{ item["artists"][0]["artist_id"] }}'>{{ item["artists"][0]['artist_name'] }}</a>
+                    {% for artist in item['artists'][1:] %}
+                        , <a href='artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
+                    {% endfor %}
+                </td>
+                <td>
+                    <span class="dropdown">
+                    <span class="glyphicon glyphicon-circle-arrow-left dropdown-toggle" id="playlist-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"></span>
+                    <ul class="dropdown-menu dropdown-menu-right track-playlist-dropdown" aria-labelledby="playlist-dropdown" data-tooltip="{{ id }}">
+                        <li><a href="/create-playlist">+ New Playlist</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li class='dropdown-header owned-playlists'>Owned Playlists</li>
+                    </ul>
+                    </span>
+                </td>
+            </tr>
+
+    {% endfor %}
+    </tbody>
+    </table>
+
+
+
+<script type=text/javascript>
+    var currentUser = {{ session['user_id']|tojson|safe }}; 
+</script> 
+
+<script src='/static/add_tracks.js'></script>
+{% endblock %}
+
+{% block javascript %}tracks{% endblock %}
