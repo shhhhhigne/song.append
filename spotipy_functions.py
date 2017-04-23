@@ -21,6 +21,9 @@ sp_info = {}
 
 username = 'zzzeldah'
 
+# later I could integrate google maps api to do location services or whatever
+COUNTRY = 'US'
+
 def initialize_auth():
 
     access_token_info = SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
@@ -133,19 +136,15 @@ def get_artist_info(artist_spotify_id):
     #TODO: get artist info
     spotify = spotipy.Spotify()
 
-    artist_albums = spotify.artist_albums(artist_spotify_id)
+    artist_albums = spotify.artist_albums(artist_spotify_id, country=COUNTRY)
 
     album_ids = []
 
     for album in artist_albums['items']:
         album_ids.append(album['id'])
 
-    full_artist_info = spotify.artist(artist_spotify_id)
 
-    print '------'
-    print full_artist_info
-    print '--------'
-    print type(full_artist_info)
+    full_artist_info = spotify.artist(artist_spotify_id)
 
     all_results = {'album_data': get_album_info(album_ids),
                    'artist_data': get_artists([full_artist_info])
@@ -155,6 +154,7 @@ def get_artist_info(artist_spotify_id):
 
 
 def get_artists(all_artists):
+
     artists = []
     for artist in all_artists:
         artist_info = {'artist_spotify_id': artist['id'],
@@ -170,19 +170,6 @@ def get_artists(all_artists):
     return artists
 
 
-# def get_album_test(album_spotify_ids):
-
-#     spotify = spotipy.Spotify()
-
-#     albums = spotify.albums(album_spotify_ids)
-
-#     for album in albums['albums']:
-#         return type(album)
-
-#     return albums
-
-
-
 def get_album_info(album_spotify_ids):
 
     spotify = spotipy.Spotify()
@@ -195,9 +182,11 @@ def get_album_info(album_spotify_ids):
 
         album_spotify_id = album_info['id']
 
-        album_data = {'album_name': album_info['name'],
-                      'album_spotify_id': album_spotify_id,
-                      'album_url': album_info['external_urls']['spotify']}
+        # album_data = {'album_name': album_info['name'],
+        #               'album_spotify_id': album_spotify_id,
+        #               'album_url': album_info['external_urls']['spotify']}
+
+        album_data = get_album(album_info)
 
         album_artists = get_artists(album_info['artists'])
 
@@ -211,24 +200,7 @@ def get_album_info(album_spotify_ids):
 
         for item in track_items:
 
-            # artists = get_artists(item['artists'])        
-
-            # track_info = {'spotify_id': item['id'],
-            #               'name': item['name'],
-            #               'preview': item['preview_url'],
-            #               'spotify_url': item['external_urls']['spotify'],
-            #               'artists': artists,
-            #               'spotify_album_id': album_spotify_id,
-            #               'album_name': album_info['name'],
-            #               'album_url': album_info['external_urls']['spotify']
-            # }
-
-            # ids = add_song_to_db(track_info)
-            # track_info['id'] = ids['song_id']
-            # track_info['album_id'] = ids['album_id']
-
-            track_info = get_track_info(item)
-
+            track_info = get_track_info(item, album_data)
 
             track_results[track_info['id']] = track_info
 
@@ -243,38 +215,38 @@ def get_album_info(album_spotify_ids):
     return all_results
 
 
+def get_album(album_info):
+
+    album_data = {'album_spotify_id': album_info['id'],
+                  'album_name': album_info['name'],
+                  'album_url': album_info['external_urls']['spotify']}
+
+    return album_data
 
 
-def get_track_info(item):
-
-    # artists = []
-    # for artist in item['artists']:
-    #     artist_info = {'artist_spotify_id': artist['id'],
-    #                    'artist_name': artist['name'],
-    #                    'artist_url': artist['external_urls']['spotify']}
-
-
-    #     artist_info['artist_id'] = add_artist_to_db(artist_info)
-
-
-    #     artists.append(artist_info)
+def get_track_info(item, album_data=None):
 
     artists = get_artists(item['artists'])
 
+    if album_data == None:
+        album_data = get_album(item['album'])
 
     track_info = {'spotify_id': item['id'],
                   'name': item['name'],
                   'preview': item['preview_url'],
                   'spotify_url': item['external_urls']['spotify'],
-                  'artists': artists,
-                  'spotify_album_id': item['album']['id'],
-                  'album_name': item['album']['name'],
-                  'album_url': item['album']['external_urls']['spotify']
+                  'artists': artists
+                  # 'spotify_album_id': item['album']['id'],
+                  # 'album_name': item['album']['name'],
+                  # 'album_url': item['album']['external_urls']['spotify']
     }
+
+    track_info.update(album_data)
 
     ids = add_song_to_db(track_info)
     track_info['id'] = ids['song_id']
     track_info['album_id'] = ids['album_id']
+
     return track_info
 
 

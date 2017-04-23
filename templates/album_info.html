@@ -6,7 +6,7 @@
 
 <h2 class='current-page' value='album-info'>{{ album_data["album_name"] }}</h2>
 <div class='playlist-info'>
-<h5><span class='playlist-data-label'>By:</span> <span class='playlist-data'>{% for artist in album_data["artists"] %} <a href='artist/{{ artist["artist_id"] }}'>{{ artist["artist_name"] }}</a> {% endfor %} </span></h5>
+<h5><span class='playlist-data-label'>By:</span> <span class='playlist-data'>{% for artist in album_data["artists"] %} <a href='/artist-info/{{ artist["artist_id"] }}'>{{ artist["artist_name"] }}</a> {% endfor %} </span></h5>
 </div>
 
 
@@ -36,9 +36,9 @@
                 </td>
                 <td><a href='track/{{ id }}'>{{ item['name'] }} </a></td>
                 <td>
-                    <a href='artist/{{ item["artists"][0]["artist_id"] }}'>{{ item["artists"][0]['artist_name'] }}</a>
+                    <a href='/artist/{{ item["artists"][0]["artist_id"] }}'>{{ item["artists"][0]['artist_name'] }}</a>
                     {% for artist in item['artists'][1:] %}
-                        , <a href='artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
+                        , <a href='/artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
                     {% endfor %}
                 </td>
                 <td>

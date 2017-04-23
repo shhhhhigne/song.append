@@ -1009,7 +1009,7 @@ def get_artist_data(artist_id):
 
     return render_template('artist_info.html',
                            artist_data=artist_data,
-                           album_data=album_data)
+                           all_album_data=album_data)
 
 
 

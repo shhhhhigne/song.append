@@ -70,7 +70,7 @@ def add_artist_to_db(artist_info):
 
 def add_album_to_db(track_info):
 
-    album_spotify_id = track_info['spotify_album_id']
+    album_spotify_id = track_info['album_spotify_id']
 
     try:
         album_object = Album.query.filter_by(album_spotify_id=album_spotify_id).one()

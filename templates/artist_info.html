@@ -3,11 +3,12 @@
 {% block pagetitle %}Artist Info{% endblock %}
 
 {% block content %}
+{{ artist_data }}
 
-<h2 class='current-page' value='artist-info'>{{ artist_data["artist_name"] }}</h2>
+<div>
+{% for album in all_album_data %}
+<h3><a href='/album-info/{{ album["album_data"]["album_id"] }}'>{{ album["album_data"]["album_name"] }}</a></h3>
 
-{% for album in album_data %}
-<h3>{{ album["album_name"] }}</h3>
 <table class="table table-hover">
 <thead>
 <tr>
@@ -19,7 +20,7 @@
 </thead>
 <tbody>
 
-    {% for id,item in track_results.items() %}
+    {% for id,item in album["track_results"].items() %}
         
             <tr>
                 <td>
@@ -31,11 +32,11 @@
                     </ul> 
                     </span>
                 </td>
-                <td><a href='track/{{ id }}'>{{ item['name'] }} </a></td>
+                <td><a href='/track/{{ id }}'>{{ item['name'] }} </a></td>
                 <td>
-                    <a href='artist/{{ item["artists"][0]["artist_id"] }}'>{{ item["artists"][0]['artist_name'] }}</a>
+                    <a href='/artist-info/{{ item["artists"][0]["artist_id"] }}'>{{ item["artists"][0]['artist_name'] }}</a>
                     {% for artist in item['artists'][1:] %}
-                        , <a href='artist/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
+                        , <a href='/artist-info/{{ artist["artist_id"] }}'>{{ artist['artist_name'] }}</a>
                     {% endfor %}
                 </td>
                 <td>
@@ -53,14 +54,9 @@
     {% endfor %}
     </tbody>
     </table>
+{% endfor %}
+
+</div>
 
 
-
-<script type=text/javascript>
-    var currentUser = {{ session['user_id']|tojson|safe }}; 
-</script> 
-
-<script src='/static/add_tracks.js'></script>
 {% endblock %}
-
-{% block javascript %}tracks{% endblock %}

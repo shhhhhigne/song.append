@@ -240,6 +240,8 @@ class Vote(db.Model):
         return s % (self.vote_id, self.ps_id, self.user_id, self.value)
 
 
+
+
 ##############################################################################
 # Helper functions
 import sys
