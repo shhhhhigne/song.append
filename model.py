@@ -23,6 +23,8 @@ class User(db.Model):
     fname = db.Column(db.String(20), nullable=False)
     lname = db.Column(db.String(40), nullable=False)
     password = db.Column(db.String(64), nullable=False)
+
+    user_avatar = db.Column(db.String(300), default='/static/default_avatar.png', nullable=False)
     
     def __repr__(self):
         """Provide helpful representation when printed"""
@@ -240,32 +242,59 @@ class Vote(db.Model):
         return s % (self.vote_id, self.ps_id, self.user_id, self.value)
 
 
+class Comment(db.Model):
+    """Comments in a playlist.
+
+    Currently unused, will be used for comments on playlists between playlist users
+    """
+
+
+    __tablename__ = "comments"
+
+    comment_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    comment_body = db.Column(db.String, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    playlist_id = db.Column(db.Integer, db.ForeignKey("playlists.playlist_id"), nullable=False)
+
+    user = db.relationship("User", backref=db.backref("comments", order_by=comment_id))
+    playlist = db.relationship("Playlist", backref=db.backref("comments", order_by=comment_id))
+
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        s = "<Comment comment_id=%s user_id=%s playlist_id=%s>"
+        return s % (self.comment_id, self.user_id, self.playlist_id)
+
+
+class Reply(db.Model):
+    """Replies to comments.
+
+    Currently unused, will be used for replies to comments on playlists between playlist users
+    """
+
+    __tablename__ = "replies"
+
+    reply_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    reply_body = db.Column(db.String, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    comment_id = db.Column(db.Integer, db.ForeignKey("comments.comment_id"), nullable=False)
+
+    user = db.relationship("User", backref=db.backref("replies", order_by=reply_id))
+    comment = db.relationship("Comment", backref=db.backref("replies", order_by=reply_id))
+
+    def __repr__(self):
+        """Provide helpful representation when printed"""
+
+        s = "<Reply reply_id=%s user_id=%s comment_id=%s>"
+        return s % (self.reply_id, self.user_id, self.comment_id)
+
+
+
 
 
 ##############################################################################
-# Helper functions
-import sys
-import spotipy
-import spotipy.util as util
-
-def pull_all_playlists():
-    pass
-
-    # scope ='user-library-read'
-
-    # username = 'ZZZeldaH'
-
-    # token = util.prompt_for_user_token(username, scope)
-
-    # if token:
-    #     sp = spotify.Spotify(auth=token)
-    #     results = sp.user_playlists()
-    
-    # return results
-
-
-
-
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""

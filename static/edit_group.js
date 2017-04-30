@@ -1,5 +1,4 @@
 function memberRemoved(results) {
-    // alert(results)
     $.alert({
             // icon: 'glyphicon glyphicon-thumbs-up',
             title: results,
@@ -9,7 +8,6 @@ function memberRemoved(results) {
             }
         });
     // location.reload(true);
-
 }
 
 function removeMember() {
@@ -55,22 +53,16 @@ function removeMember() {
                                 'user_id': user_id
             };
 
-
-            // $.post('/remove-member/<group_id>/<user_id>',
-
             $.post('/remove-member',
                    removal_info,
                    memberRemoved
             );
         }
     });
-
-    
-
 }
 
-$('.remove_member').on('click', removeMember);
 
+$('.remove_member').on('click', removeMember);
 
 function membersAdded(results) {
     $.alert({
@@ -81,9 +73,6 @@ function membersAdded(results) {
                 location.reload(true);
             }
         });
-
-    
-
 }
 
 
@@ -110,7 +99,6 @@ $('.add_member').on('click', addMember);
 
 
 function newMemberAdmin(results) {
-    // alert(results)
     $.alert({
             // icon: 'glyphicon glyphicon-thumbs-up',
             title: results,
@@ -120,8 +108,8 @@ function newMemberAdmin(results) {
             }
         });
     // location.reload(true);
-
 }
+
 
 function adminMember() {
 
@@ -138,14 +126,10 @@ function adminMember() {
                           'user_id': user_id
     };
 
-
-    // $.post('/remove-member/<group_id>/<user_id>',
-
     $.post('/admin-member',
            new_admin_info,
            newMemberAdmin
     );
-
 }
 
 $('.admin_member').on('click', adminMember);

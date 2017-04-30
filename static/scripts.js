@@ -9,14 +9,10 @@ $(document).ready(function () {
 
 });
 
-
-
 function populateDropDownOwned(playlist_info) {
 
     for (playlist_id in playlist_info) {
         var playlist_name = playlist_info[playlist_id];
-    
-        // console.log(`playlist name = ${playlist_name}`)
 
          newItem = $('<li>');
          newItemLink = $('<a>', { href: '/playlist/'+playlist_id,
@@ -48,8 +44,6 @@ function populateDropDownBelong(playlist_info) {
 
     for (playlist_id in playlist_info) {
         var playlist_name = playlist_info[playlist_id];
-    
-        // console.log(`playlist name = ${playlist_name}`)
 
          newItem = $('<li>');
          newItemLink = $('<a>', { href: '/playlist/'+playlist_id,
@@ -74,16 +68,11 @@ getBelongingPlaylists();
 
 
 function populateDropDownGroupsAdmin(group_info) {
-    // console.log('popu')
 
-    // console.log(group_info)
     $('#dropdown-group-menu').append('<li class="dropdown-header admin-group">Administrated Groups</li>')
-
 
     for (group_id in group_info) {
         var group_name = group_info[group_id];
-    
-        // console.log(`group name = ${group_name}`)
 
          newItem = $('<li>');
          newItemLink = $('<a>', { href: '/edit-group/'+group_id,
@@ -92,21 +81,8 @@ function populateDropDownGroupsAdmin(group_info) {
         });
          newItem.append(newItemLink);
 
-         // newItemLink.createAttribute('href');
-
-
-         // newItemLink.href = '/get-playlist/'+playlist_id;
-         // newItemLink = newItem.append($('<a>', { href: '/get-playlist/'+playlist_id.href }));
-
-
-    
-        // newItem.addClass('nav-playlist-'+playlist['id'])
-
         newItemLink.text(group_name);
         newItem.addClass('dropdown-group');
-        // newItemLink.attr('value') = playlist_id;
-        // newItemLink.attr('href') = '/get-playlist/'+playlist_id;
-
        
         $('#dropdown-group-menu').append(newItem)
     }
@@ -120,40 +96,23 @@ function getAdminGroups() {
 getAdminGroups();
 
 function populateDropDownGroups(group_info) {
-    // console.log('popu')
 
-    // console.log(group_info)
     $('#dropdown-group-menu').append('<li role="separator" class="divider"></li>');
     $('#dropdown-group-menu').append('<li class="dropdown-header admin-group">Belonging Groups</li>')
 
 
     for (group_id in group_info) {
         var group_name = group_info[group_id];
-    
-        // console.log(`group name = ${group_name}`)
 
-         newItem = $('<li>');
-         newItemLink = $('<a>', { href: '/group/'+group_id,
+        newItem = $('<li>');
+        newItemLink = $('<a>', { href: '/group/'+group_id,
                                   value: group_id
-
         });
-         newItem.append(newItemLink);
 
-         // newItemLink.createAttribute('href');
-
-
-         // newItemLink.href = '/get-playlist/'+playlist_id;
-         // newItemLink = newItem.append($('<a>', { href: '/get-playlist/'+playlist_id.href }));
-
-
-    
-        // newItem.addClass('nav-playlist-'+playlist['id'])
+        newItem.append(newItemLink);
 
         newItemLink.text(group_name);
         newItem.addClass('dropdown-group');
-        // newItemLink.attr('value') = playlist_id;
-        // newItemLink.attr('href') = '/get-playlist/'+playlist_id;
-
        
         $('#dropdown-group-menu').append(newItem)
     }

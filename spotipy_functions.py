@@ -42,6 +42,7 @@ def get_token():
     from the SPOTIFY_CLIENT object
     """
 
+    # I THINK THERE MIGHT STILL BE SOMETHING WRONG HERE BUT I HAVENT HAD A CHANCE TO DELVE FAR INTO IT
     # if SPOTIPY_CLIENT._is_token_expired(sp_info could be the whole thing instead of what I have it):
     #     SPOTIPY_CLIENT.refresh_access_token(os.environ.get('R_TOKEN'))
     now = datetime.now()
@@ -67,21 +68,20 @@ def create_playlist(playlist_name):
 
 
 def change_playlist_name(playlist_id, new_name):
+    """Changes a playlists name in spotify -- only playlist owner
+    
+        Nothing is returned
+    """
 
     token = get_token()
 
     sp = spotipy.Spotify(auth=token)
-    playlist = sp.user_playlist_change_details(username, 
-                                               str(playlist_id), 
-                                               name=str(new_name),
-                                               public=None,
-                                               collaborative=None)
+    sp.user_playlist_change_details(username,
+                                    str(playlist_id),
+                                    name=str(new_name),
+                                    public=None,
+                                    collaborative=None)
 
-    # print playlist
-
-
-def show_user_playlists(playlist_names):
-    pass
 
 def show_all_playlists():
 
@@ -92,48 +92,38 @@ def show_all_playlists():
 
     return playlists
 
-def get_playlist(playlist_id):
-
-    # token = get_token()
-
-
-    pass
 
 def add_song_to_spotify_playlist(song_id, playlist_id):
+    """Adds a song to a playlist in spotify
+    
+        Nothing is returned
+    """
 
     token = get_token()
 
     sp = spotipy.Spotify(auth=token)
-    # print '*******', song_id
 
-    # song_id = str(song_id)
-    # song_ids = []
-    # song_ids.append(song_id)
+    sp.user_playlist_add_tracks(username, playlist_id, song_id)
 
-    # print song_ids
-
-    results = sp.user_playlist_add_tracks(username, playlist_id, song_id)
-    # print '*******', results
 
 def remove_song_from_spotify_playlist(song_id, playlist_id):
+    """Removes a song to a playlist in spotify
+
+        Nothing is returned
+    """
 
     token = get_token()
 
     sp = spotipy.Spotify(auth=token)
-    # print song_id
-    results = sp.user_playlist_remove_all_occurrences_of_tracks(username, str(playlist_id), song_id)
-    # print  '#######', results
-
-
-def get_playlist_info(playlist_id):
-
-    #TODO: get plylist info
-    pass
+    sp.user_playlist_remove_all_occurrences_of_tracks(username, str(playlist_id), song_id)
 
 
 def get_artist_info(artist_spotify_id):
+    """Returns all artist data
+    
+        Their albums, the songs on those albums, etc
+    """
 
-    #TODO: get artist info
     spotify = spotipy.Spotify()
 
     artist_albums = spotify.artist_albums(artist_spotify_id, country=COUNTRY)
@@ -154,6 +144,7 @@ def get_artist_info(artist_spotify_id):
 
 
 def get_artists(all_artists):
+    """Parses and returns data about artists into expected format"""
 
     artists = []
     for artist in all_artists:
@@ -171,6 +162,10 @@ def get_artists(all_artists):
 
 
 def get_album_info(album_spotify_ids):
+    """Returns all data about and album
+    
+        All the songs on it, its artist, etc.
+    """
 
     spotify = spotipy.Spotify()
 
@@ -182,16 +177,11 @@ def get_album_info(album_spotify_ids):
 
         album_spotify_id = album_info['id']
 
-        # album_data = {'album_name': album_info['name'],
-        #               'album_spotify_id': album_spotify_id,
-        #               'album_url': album_info['external_urls']['spotify']}
-
         album_data = get_album(album_info)
 
         album_artists = get_artists(album_info['artists'])
 
         album_data['artists'] = album_artists
-
 
         track_results = {}
 
@@ -216,6 +206,7 @@ def get_album_info(album_spotify_ids):
 
 
 def get_album(album_info):
+    """Parses album info into expected format and returns it"""
 
     album_data = {'album_spotify_id': album_info['id'],
                   'album_name': album_info['name'],
@@ -225,6 +216,7 @@ def get_album(album_info):
 
 
 def get_track_info(item, album_data=None):
+    """Gets and returns all track info and parses it into expected format"""
 
     artists = get_artists(item['artists'])
 
@@ -236,9 +228,6 @@ def get_track_info(item, album_data=None):
                   'preview': item['preview_url'],
                   'spotify_url': item['external_urls']['spotify'],
                   'artists': artists
-                  # 'spotify_album_id': item['album']['id'],
-                  # 'album_name': item['album']['name'],
-                  # 'album_url': item['album']['external_urls']['spotify']
     }
 
     track_info.update(album_data)
@@ -250,22 +239,12 @@ def get_track_info(item, album_data=None):
     return track_info
 
 
-
 def search(user_input, offset=0):
+    """Searches given users input and returns results"""
 
     spotify = spotipy.Spotify()
 
-
-    # all_results = {'tracks': None
-    #                # 'playlists': None,
-    #                # 'albums': None,
-    #                # 'artists': None
-                   # } 
-
     all_results = {}
-
-
-   
 
     track_results = spotify.search(q=user_input, offset=offset, type='track')
     track_items = track_results['tracks']['items']
@@ -273,7 +252,6 @@ def search(user_input, offset=0):
 
     if len(track_items) > 0:
         for item in track_items:
-            # print '*******************tracks', tracks
             track_info = get_track_info(item)
             tracks[track_info['id']] = track_info
 
@@ -283,11 +261,10 @@ def search(user_input, offset=0):
         all_results['tracks'] = None
 
 
+    #Just to have something else in the dictionary so there is something to be skipped
     all_results['stuff'] = 'stuff'
 
-    # print all_results
-
-    #TODO: be able to search things other than songs 
+    #TODO: be able to search things other than songs -- dont know if I actually want this -- to be seen
 
     # artist_results = spotify.search(q=user_input, type='artist')
     # artist_items = artist_results['artists']['items']

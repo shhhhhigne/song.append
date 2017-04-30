@@ -1,5 +1,4 @@
 function songRemoved(results) {
-    // alert(results)
 
     song_name = results['song_name'];
     playlist_name = results['playlist_name'];
@@ -14,12 +13,9 @@ function songRemoved(results) {
 
             }
         });
-
-
 }
 
 function removeSong() {
-
     var ps_id = $(this).data('ps_id');
     
     var remove_info = {'ps_id': ps_id,
@@ -29,14 +25,12 @@ function removeSong() {
            remove_info,
            songRemoved
     );
-
 }
 
 $('.remove-song').on('click', removeSong);
 
-function songAdded(results) {
-    // alert(results)
 
+function songAdded(results) {
     song_name = results['song_name'];
     playlist_name = results['playlist_name'];
     lock_status = results['lock_status'];
@@ -47,9 +41,8 @@ function songAdded(results) {
             content: `It is ${lock_status}`,
             onClose: function() {
                 location.reload(true);
-
             }
-        });
+     });
 }
 
 function addSong() {
@@ -69,9 +62,7 @@ function addSong() {
 $('.add-song').on('click', addSong);
 
 
-
 function showLockStatus(results) {
-
 
     for (var i=0; i<results.length; i++) {
 
@@ -79,29 +70,21 @@ function showLockStatus(results) {
         var ps_id = results[i]['ps_id'];
 
         var lock_id = ps_id + '-lock';
-        // console.log(lock_id);
 
         if (lock_status == true) {
             $('#'+lock_id).html('Unlock Song');
-            // var lock_li = $('#'+lock_id).parent();
-            // console.log(lock_li)
-            // $(newItemLink).data('song_id', song_id)
             var lock_status_word = 'locked'               
         }
         else if (lock_status == false) {
             $('#'+lock_id).html('Lock in Playlist');
-            // console.log($('#'+lock_id).parent())
-            // console.log(lock_li)
             lock_status_word = 'unlocked'
 
         }
         var lock_li = $('#'+lock_id).parent();
         $(lock_li).attr('lock_status', lock_status_word)
-
-
     }
-
 }
+
 
 checkLockStatus()
 
@@ -112,8 +95,6 @@ function checkLockStatus() {
         ps_id = $(this).data('ps_id');
 
         ps_ids.push(ps_id);
-
-        
     });
 
     ps_data = {'ps_ids': ps_ids};
@@ -123,6 +104,7 @@ function checkLockStatus() {
             showLockStatus
     );
 }
+
 
 function songLockChanged(results) {
     song_name = results['song_name'];
@@ -142,9 +124,6 @@ function songLockChanged(results) {
             content: alert_message,
             onClose: function () { location.reload(true); }
         });
-
-    // location.reload(true);
-
 }
 
 
@@ -152,8 +131,7 @@ function lockSong() {
 
     var ps_id = $(this).data('ps_id');
     var lock_status = $(this).attr('lock_status');
-    
-    
+
     var lock_info = {'ps_id': ps_id,
                      'old_lock_status': lock_status
     };
@@ -164,9 +142,7 @@ function lockSong() {
     );
 }
 
-
 $('.lock-song').on('click', lockSong);
-
 
 $(document).ready(function(){
     $('#back-button').tooltip();

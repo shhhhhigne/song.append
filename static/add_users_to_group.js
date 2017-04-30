@@ -1,12 +1,10 @@
+//I DONT BELIVE THAT I USE THIS CODE ANY MORE -- I MIGHT WANT TO DELETE
+
 "use strict";
-
-console.log('hello');
-
 
 function usersAddedAlert(result) {
     alert('Group users updated');
 }
-
 
 function updateGroupUsers(evt) {
 

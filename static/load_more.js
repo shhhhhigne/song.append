@@ -1,13 +1,5 @@
 function showMore(results) {
-    console.log(results)
-
-    // offset = $('#load-more').data('offset')
-
-    // $('#load-more').data('offset') = offset + 10;
-
-    // table = $('#search-table')
     var tracks = results['tracks']
-
 
     for (var song_id in tracks) {
         var song = tracks[song_id]
@@ -18,6 +10,7 @@ function showMore(results) {
 
         }
 
+        //The HTML that is added to create each new row that contains a result
         var new_row = `<tr>
             <td>
                 <span class="dropdown">
@@ -46,16 +39,10 @@ function showMore(results) {
         </tr>
         `
 
-
         $(".table tbody").append(new_row);
-
     }
-
-
-
     var offset = $('#load-more').data("offset") + 10;       
-    $('#load-more').data('offset', offset); 
-
+    $('#load-more').data('offset', offset);
 }
 
 
@@ -75,13 +62,11 @@ function loadMore(evt) {
                  'user_input': user_input
     }
 
-
     $.get('/load-more-results',
            load_info,
            showMore
     );
 }
-
 
 $('#load-more').on('click', loadMore);
 

@@ -17,10 +17,8 @@ from spotipy_functions import initialize_auth, create_playlist, show_all_playlis
 from spotipy_functions import add_song_to_spotify_playlist, remove_song_from_spotify_playlist
 
 
-
-
-
 def get_user_groups(user_id):
+    """Retrieve and return all groups a user belongs to"""
 
     users_groups = UserGroup.query.filter_by(user_id=user_id).all()
 
@@ -31,12 +29,12 @@ def get_user_groups(user_id):
             groups.append(group)
         else:
             continue
-            # print "not in ", users_group.group_id
 
     return groups
 
 
 def get_user_administered_groups(user_id):
+    """Retrieve and return all groups a user admins"""
 
     users_groups = Group.query.filter_by(user_id=user_id).all()
 
@@ -44,6 +42,7 @@ def get_user_administered_groups(user_id):
 
 
 def get_user_owned_playlists(user_id):
+    """Retrieve and return all playlists a user owns"""
 
     user_playlists = Playlist.query.filter_by(user_id=user_id).all()
 
@@ -51,6 +50,7 @@ def get_user_owned_playlists(user_id):
 
 
 def get_user_belonging_playlists(user_id):
+    """Retrieve and return all playlists a has voting rights for"""
 
     user_groups = get_user_groups(user_id)
 
@@ -66,6 +66,10 @@ def get_user_belonging_playlists(user_id):
 
 
 def get_playlist_songs(playlist_id, status):
+    """Retrieve and return all songs in a given playlist
+    
+        Gets active and requested songs separately
+    """
 
     playlist_songs = PlaylistSong.query.filter_by(playlist_id=playlist_id).filter_by(status=status).order_by('index').all()
 
@@ -73,6 +77,7 @@ def get_playlist_songs(playlist_id, status):
 
 
 def get_song_data(song_id):
+    """Retrieve and return all data about a given song in a playlist from database"""
 
     song = Song.query.filter_by(song_id=song_id).one()
 
@@ -94,29 +99,29 @@ def get_song_data(song_id):
 
 
 def get_song_value(ps_id):
+    """Retrieve and return the value of a song
+    
+        The value is determined by adding up all user votes (positive +1, negative -1)
+    """
 
     # I might want to do this as a sql thing and not just loop through it
     values = Vote.query.filter_by(ps_id=ps_id).all()
 
     total = 0
     for instance in values:
-        # print '*******', instance
-        # if instance.user.user_group.in_group == True:
         total = total + int(instance.value)
 
     return total
 
 
 def register_user_vote(user_id, ps_id, vote_value):
+    """When a user votes, register that vote"""
 
     try:
         user_vote_object = Vote.query.filter_by(ps_id=ps_id).filter_by(user_id=user_id).one()
 
         if user_vote_object.value == vote_value:
-            #This needs to change so that they cant click on the same thumb again
-            # or somehow be refactored
-            # vote_total = get_song_value(ps_id)
-
+            #I dont think i need this alert variable any more
             alert = 'you already gave this a' + str(vote_value)
             vote_status = 'same',
 
@@ -125,6 +130,7 @@ def register_user_vote(user_id, ps_id, vote_value):
 
             db.session.commit()
 
+            #I dont think i need this alert variable any more
             alert = 'your vote is now changed to ' + str(vote_value)
             vote_status = 'changed'
 
@@ -138,7 +144,7 @@ def register_user_vote(user_id, ps_id, vote_value):
         db.session.add(user_vote_object)
         db.session.commit()
 
-
+        # I dont think i need this alert variable any more -- not sure
         alert = 'You gave a vote of ' + str(vote_value)
         vote_status = 'new'
 
@@ -156,78 +162,46 @@ def register_user_vote(user_id, ps_id, vote_value):
 
 
 def check_song_status(ps_id, vote_total, vote_value):
+    """When a song is voted on, this checks to see if said vote changes the status of the song
+    
+        A song can go from requested to active, requested to deleted, or active to deleted
+    """
 
     ps_object = PlaylistSong.query.filter_by(ps_id=ps_id).one()
     immutable = ps_object.immutable
     if immutable == True:
         return False
 
-    # playlist_object = Playlist.query.filter_by(playlist_id=ps_object.playlist_id).one()
-
     score_to_add = ps_object.playlist.num_votes_add
     score_to_del = -(ps_object.playlist.num_votes_del)
-
-    # playlist_name = playlist_object.playlist_name
-    # playlist_name_req = playlist_name + '_req'
-    # playlist_name_full = playlist_name + '_full'
-
-    # playlist_spotify_id_act = playlist_object.playlist_spotify_id
-    # playlist_spotify_id_req = playlist_object.playlist_spotify_id_req
-    # playlist_spotify_id_full = playlist_object.playlist_spotify_id_full
 
     song_status = ps_object.status
     status_changed = False
 
-    # song_object = Song.query.filter_by(song_id=ps_object.song_id).one()
-    # song_spotify_id = song_object.song_spotify_id
 
     if vote_value == -1:
         if vote_total <= score_to_del and song_status != 'deleted':
-            
             status_changed = True
-
             remove_song_fully(ps_object)
 
-            # remove_song_helper(song_spotify_id, playlist_object, '_full')
-            # remove_song_from_spotify_playlist(playlist_spotify_id_full, song_spotify_id)
-
-            # if song_status == 'active':
-            #     remove_song_from_spotify_playlist(playlist_spotify_id_act, song_spotify_id)
-            # else:
-            #     remove_song_from_spotify_playlist(playlist_spotify_id_req, song_spotify_id)
-    # Should I have this as an if or as an elif
     elif vote_value == 1:
         if song_status == 'deleted':
-            
             status_changed = True
             readd_song_to_req(ps_object)
 
-            # add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_full)
-            # add_song_to_spotify_playlist(song_spotify_id, playlist_spotify_id_req)
-
         elif vote_total >= score_to_add and song_status == 'requested':
-            # ps_object.status ='active'
-            # db.session.commit()
             status_changed = True
             move_song_req_to_act(ps_object)
-
-            # import pdb
-            # pdb.set_trace()
-
-            # add_song_to_spotify_playlist([song_spotify_id], playlist_spotify_id_act)
-            # remove_song_from_spotify_playlist([song_spotify_id], playlist_spotify_id_req)
 
     # I could just check the status changed here
     # should I recall the view playlists here?? h
     # how should I do it
 
-
-    ####### I could also do all this adding and removing only when a user clicks
-    #### the big play button and just run through my db and update the spotify playlists
     return status_changed
 
 
 def get_playlist_data(playlist_id):
+    """Get all songs and data for a given playlist"""
 
     playlist = Playlist.query.filter_by(playlist_id=playlist_id).one()
 
@@ -247,8 +221,6 @@ def get_playlist_data(playlist_id):
         song_data = get_song_data(song.song_id)
         song_data['ps_id'] = song.ps_id
         song_data['song-value'] = get_song_value(song.ps_id)
-        # print '**********', get_song_value(song.ps_id)
-        # song_data['song_value'] = get_song_value(song.ps_id)
         req_songs.append(song_data)
 
     playlist_data = {'playlist': playlist,
@@ -259,14 +231,13 @@ def get_playlist_data(playlist_id):
 
 
 def get_group_data(group_id):
+    """Get all users and data for a given group"""
 
     group_object = Group.query.filter_by(group_id=group_id).one()
 
     user_id = session['user_id']
 
     admin_id = group_object.user_id
-
-    # owner_object = User.query.filter_by(user_id=owner_id).one()
 
     admin = {'name': group_object.user.fname + ' ' + group_object.user.lname,
              'username': group_object.user.username,
@@ -308,10 +279,9 @@ def get_group_data(group_id):
 
     return group_data
 
-# def remove_users_from_group():
-
 
 def move_song_req_to_act(ps_object):
+    """Logic to move songs from the requested playlist to the active playlist"""
 
     song_spotify_id = ps_object.song.song_spotify_id
     playlist_object = ps_object.playlist
@@ -324,6 +294,7 @@ def move_song_req_to_act(ps_object):
 
 
 def readd_song_to_req(ps_object):
+    """Logic to move songs that were deleted from a playlist back into the requested playlist"""
 
     song_spotify_id = ps_object.song.song_spotify_id
     playlist_object = ps_object.playlist
@@ -336,8 +307,7 @@ def readd_song_to_req(ps_object):
 
 
 def remove_song_fully(ps_object):
-
-    # print ps_object
+    """Logic to delete a song from a playlist entirely"""
 
     song_spotify_id = ps_object.song.song_spotify_id
     playlist_object = ps_object.playlist
@@ -359,6 +329,7 @@ def remove_song_fully(ps_object):
 
 
 def remove_song_helper(song_spotify_id, playlist_object, playlist_type):
+    """Logic the helps move songs around/change their status -- removal logic"""
 
     playlist_name = playlist_object.playlist_name + playlist_type
     if playlist_type == 'req':
@@ -376,8 +347,8 @@ def remove_song_helper(song_spotify_id, playlist_object, playlist_type):
 
 
 def add_song_helper(song_spotify_id, playlist_object, playlist_type):
+    """Logic the helps move songs around/change their status -- add logic"""
 
-    # playlist_id_s = playlist_spotify_id + playlist_type
     playlist_name = playlist_object.playlist_name + playlist_type
     if playlist_type == 'req':
         playlist_spotify_id = playlist_object.playlist_spotify_id_req

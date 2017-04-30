@@ -14,6 +14,10 @@ from model import connect_to_db, db
 
 
 def add_song_to_db(track_info):
+    """Logic to help add a song to the database
+    
+        Happens when a song appears in search results
+    """
 
     song_spotify_id = track_info['spotify_id']
 
@@ -32,10 +36,7 @@ def add_song_to_db(track_info):
                            )
 
         db.session.add(song_object)
-
         db.session.commit()
-
-        # print '#######', track_info['artists']
 
         for artist in track_info['artists']:
             song_artist_object = SongArtist(song_id=song_object.song_id,
@@ -48,8 +49,11 @@ def add_song_to_db(track_info):
             'album_id': song_object.album_id}
 
 
-
 def add_artist_to_db(artist_info):
+    """Logic to help add an artist to the database
+
+        Happens when an artist appears in search results
+    """
 
     artist_spotify_id = artist_info['artist_spotify_id']
 
@@ -62,13 +66,16 @@ def add_artist_to_db(artist_info):
                                artist_spotify_url=artist_info['artist_url'])
 
         db.session.add(artist_object)
-
         db.session.commit()
 
     return artist_object.artist_id
 
 
 def add_album_to_db(track_info):
+    """Logic to help add an album to the database
+
+        Happens when an album appears in search results
+    """
 
     album_spotify_id = track_info['album_spotify_id']
 

@@ -1,16 +1,3 @@
-// function addSongToPlaylist(song_id, playlist_id) {
-
-
-//     songIds = {'song_id': song_id,
-//                'playlist_id': playlist_id
-//     };
-
-//     $.post('/add-song-to-playlist/' + song_id + '/' + playlist_id,
-//            songIds,
-//            songAddedToPlaylistSuccess
-//     );
-// }
-
 function userVoted(results) {
 
     console.log(results)
@@ -24,11 +11,6 @@ function userVoted(results) {
     var alt_thumb_id = ps_id + '_' + alt_vote_value + '_thumb';
 
     var vote_status = results['vote_status'];
-    // alert(results['user_alert']);
-
-    // var alertThumb = $('<i>')
-    //  newItemLink = $('<a>', {value: playlist_id,
-    //                                 class: 'add-song-link'
 
     if (results['vote_value'] == -1) {
         var alertThumb = "<span class='glyphicon glyphicon-thumbs-down'></span>"
@@ -74,10 +56,8 @@ function userVoted(results) {
     $('#'+thumb_id).addClass('voted-on');
     console.log(results['vote_total'])
     $('#'+vote_total_id).text(results['vote_total']);
-
-    
-
 }
+
 
 function userVote() {
 
@@ -89,35 +69,27 @@ function userVote() {
                      'vote_value': vote_info_list[1],
                      'thumb_id': thumb_id
     };
-
     $.post('/register-user-vote',
            vote_info,
            userVoted
     );
-
 }
 
 $('.user-vote').on('click', userVote);
 
 
 
-
 function showUserVotes(results) {
 
-
     for (var i=0; i<results.length; i++) {
-
         var vote_value = results[i]['vote_value']
+
         var ps_id = results[i]['ps_id']
 
         var thumb_id = ps_id + '_' + vote_value + '_thumb'
-        // console.log(thumb_id)
-
 
         $('#'+thumb_id).addClass('voted-on')
-
     }
-
 }
 
 
@@ -125,15 +97,10 @@ checkUserVotes()
 
 function checkUserVotes() {
 
-
     var ps_ids = []
     $.each($('.user-vote-col'), function() {
-
         ps_id = $(this).attr('id');
-
         ps_ids.push(ps_id);
-
-        
     });
 
     ps_data = {'ps_ids': ps_ids};
